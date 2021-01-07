@@ -22,7 +22,10 @@ def load_solution(name, greedy=False):
 
     except:
         # Solution file not found
-        print("Solution from '" + filename + "' could not found, Exitting.")
+        if(greedy):
+            print("Solution from '" + filename + "' could not found, make sure a solution exists by running test_allvis_completion.m. Exitting.")
+        else:
+            print("Solution from '" + filename + "' could not found, Exitting.")
         exit(1)
     
 
