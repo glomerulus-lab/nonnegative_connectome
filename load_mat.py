@@ -13,19 +13,21 @@ def load_solution(name, greedy=False):
 
         if(greedy):
             # Load solution from lowrank_connectome repository
-            filename = "../lowrank_connectome/" + filename + "_solution"
+            filename = "../lowrank_connectome/" + filename
 
-        filename = filename + ".mat"
+        filename = filename
+        print(filename)
         data = scipy.io.loadmat(filename)
+
 
         return data["W"][0][0], np.transpose(data["W"][1][0])
 
     except:
         # Solution file not found
         if(greedy):
-            print("Solution from '" + filename + "' could not found, make sure a solution exists by running test_allvis_completion.m. Exitting.")
+            print("Solution from '" + filename + "' could not be found, make sure a solution exists by running test_allvis_completion.m. Exitting.")
         else:
-            print("Solution from '" + filename + "' could not found, Exitting.")
+            print("Solution from '" + filename + "' could not be found, Exitting.")
         exit(1)
     
 
@@ -33,10 +35,10 @@ def load_solution(name, greedy=False):
 # Loads solution returns W_true with shape (200, 200)
 def load_test_truth():
     try:
-        data = scipy.io.loadmat("../lowrank_connectome/data/test_matricies.mat")
+        data = scipy.io.loadmat("../lowrank_connectome/data/test_matrices.mat")
         return data["W_true"]
     except:
-        print("W_true from '../lowrank_connectome/data/test_matricies.mat' could not be found, Exitting.")
+        print("W_true from '../lowrank_connectome/data/test_matrices.mat' could not be found, Exitting.")
         exit(1)
 
 
