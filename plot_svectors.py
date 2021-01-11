@@ -27,22 +27,40 @@ def plot_svectors(U, V, testname, output_name, n, raw=False):
         Q1 = U
         Q2 = V.T
     else:
-        Q1, R1 = np.linalg.qr(U)
+        Q1, R1 = np.linalg.qr(U, mode='reduced')
         Q2, R2 = np.linalg.qr(V.T)
-        u, S, v = np.linalg.svd(R1@R2.T)
+        u, S, vh = np.linalg.svd(R1 @ (R2.T) )
         Q1 = Q1 @ u
-        Q2 = Q2 @ v
+        Q2 = Q2 @ vh.T
+
+        # data = load_mat._load_plot_data("top_view")
+
+        # print("U", np.allclose(U, data["W"][0][0]))
+        # print("V", np.allclose(V, data["W"][1][0]))
+
+        # print("u", np.allclose(u, data["u"]))
+        # print("S", np.allclose(S[:, None], data["S"]))
+        # print("v", np.allclose(vh.T, data["v"]))
+
+        # print("Q1", np.allclose(Q1, data["Q1"]))
+        # print("Q2", np.allclose(Q2, data["Q2"]), Q2.shape, data["Q2"].shape)
+        # print("R1", np.allclose(R1, data["R1"]))
+        # print("R2", np.allclose(R2, data["R2"]))
+        
 
     for i in range(int(n)):
+        argmax = np.argmax(np.abs(Q1[:,i]))
+        sign = 1/np.sign(Q1[:,i][argmax])
         
+
         if(raw):
             filename = "plots/raw/"+str(output_name)+"_factor_"+str(i+1)
-            target_img = map_to_grid(Q1[:,i], voxel_coords_target, view_lut)
+            target_img = map_to_grid(Q1[:,i] * sign, voxel_coords_target, view_lut)
         else:
             filename = "plots/qr/"+str(output_name)+"_factor_"+str(i+1)
-            target_img = map_to_grid(Q1[:,i] * S[i], voxel_coords_target, view_lut)
+            target_img = map_to_grid(Q1[:,i] * S[i] * sign, voxel_coords_target, view_lut)
 
-        source_img = map_to_grid(Q2[:,i] , voxel_coords_source, view_lut)
+        source_img = map_to_grid(Q2[:,i] * sign , voxel_coords_source, view_lut)
 
         plot_factor(target_img, source_img, filename)
 
@@ -91,7 +109,7 @@ def plot_factor(target_img, source_img, filename):
     im1 = create_plot_im(ax1, target_img)
     im2 = create_plot_im(ax2, source_img)
     
-    plt.savefig(filename)
+    plt.savefig(filename, dpi=400)
     plt.clf()
     plt.close()
 
