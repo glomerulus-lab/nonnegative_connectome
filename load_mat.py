@@ -15,7 +15,6 @@ def load_solution(name, greedy=False):
             # Load solution from lowrank_connectome repository
             filename = "../lowrank_connectome/" + filename
 
-        filename = filename
         print(filename)
         data = scipy.io.loadmat(filename)
 
@@ -56,3 +55,12 @@ def load_voxel_coords(testname):
     except:
         print("'Voxel coordinates from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
+
+
+def _load_plot_data(name):
+    
+    filename = "../lowrank_connectome/data/"+name+"_plot_data"
+
+    print(filename)
+    data = scipy.io.loadmat(filename)
+    return data
