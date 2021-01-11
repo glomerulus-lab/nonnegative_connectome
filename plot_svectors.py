@@ -34,13 +34,17 @@ def plot_svectors(U, V, testname, output_name, n, raw=False):
         Q2 = Q2 @ v
 
     for i in range(int(n)):
+        
         if(raw):
+            filename = "plots/raw/"+str(output_name)+"_factor_"+str(i+1)
             target_img = map_to_grid(Q1[:,i], voxel_coords_target, view_lut)
         else:
+            filename = "plots/qr/"+str(output_name)+"_factor_"+str(i+1)
             target_img = map_to_grid(Q1[:,i] * S[i], voxel_coords_target, view_lut)
+
         source_img = map_to_grid(Q2[:,i] , voxel_coords_source, view_lut)
 
-        plot_factor(target_img, source_img, "plots/qr/"+str(output_name)+"_factor_"+str(i+1))
+        plot_factor(target_img, source_img, filename)
 
 
 
