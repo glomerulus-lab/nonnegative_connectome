@@ -2,66 +2,48 @@ import argparse
 import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colors import ListedColormap
 import load_mat
 import palettable # https://jiffyclub.github.io/palettable/
 
 parser = argparse.ArgumentParser(description="Plot dominant factors of connectome solution")
-parser.add_argument('testname',  type=str, nargs=1,
-                   help='Name of test to plot. "flatmap" or "top_view"')
-parser.add_argument('solution_name',  type=str, nargs=1,
-                   help='Name of .mat solution file, including or excluding file extension.')
-parser.add_argument('n',  type=str, nargs=1,
-                   help='number of factors to plot')
+# Arguments
+parser.add_argument('testname',         type=str, nargs=1, help='Name of test to plot. "flatmap" or "top_view"')
+parser.add_argument('solution_name',    type=str, nargs=1, help='Name of .mat solution file, including or excluding file extension.')
+parser.add_argument('n',                type=str, nargs=1, help='number of factors to plot')
+# Flags
 parser.add_argument("--greedy", action="store_true", help="Search ../lowrank_connectome/data for solution.")
-
-parser.add_argument("--raw", action="store_true", help="Plot raw solution, rather than scaled QR decompositions.")
+parser.add_argument("--raw",    action="store_true", help="Plot raw solution, rather than scaled QR decompositions.")
 
 
 def plot_svectors(U, V, testname, output_name, n, raw=False):
     voxel_coords_source, voxel_coords_target, view_lut = load_mat.load_voxel_coords(testname)
     
     if(raw):
-        Q1 = U
-        Q2 = V.T
+        outputpath = "plots/raw/"
+
+        Q1 = U.copy()
+        Q2 = (V.T).copy()
     else:
+        outputpath = "plots/qr/"
+
         Q1, R1 = np.linalg.qr(U, mode='reduced')
         Q2, R2 = np.linalg.qr(V.T)
         u, S, vh = np.linalg.svd(R1 @ (R2.T) )
-        Q1 = Q1 @ u
+        Q1 = Q1 @ u * S
         Q2 = Q2 @ vh.T
-
-        # data = load_mat._load_plot_data("top_view")
-
-        # print("U", np.allclose(U, data["W"][0][0]))
-        # print("V", np.allclose(V, data["W"][1][0]))
-
-        # print("u", np.allclose(u, data["u"]))
-        # print("S", np.allclose(S[:, None], data["S"]))
-        # print("v", np.allclose(vh.T, data["v"]))
-
-        # print("Q1", np.allclose(Q1, data["Q1"]))
-        # print("Q2", np.allclose(Q2, data["Q2"]), Q2.shape, data["Q2"].shape)
-        # print("R1", np.allclose(R1, data["R1"]))
-        # print("R2", np.allclose(R2, data["R2"]))
         
 
     for i in range(int(n)):
+        # Correct the sign such that the maximum element is positive
         argmax = np.argmax(np.abs(Q1[:,i]))
         sign = 1/np.sign(Q1[:,i][argmax])
         
-
-        if(raw):
-            filename = "plots/raw/"+str(output_name)+"_factor_"+str(i+1)
-            target_img = map_to_grid(Q1[:,i] * sign, voxel_coords_target, view_lut)
-        else:
-            filename = "plots/qr/"+str(output_name)+"_factor_"+str(i+1)
-            target_img = map_to_grid(Q1[:,i] * S[i] * sign, voxel_coords_target, view_lut)
-
+        target_img = map_to_grid(Q1[:,i] * sign, voxel_coords_target, view_lut)
         source_img = map_to_grid(Q2[:,i] * sign , voxel_coords_source, view_lut)
 
+        filename = outputpath+str(output_name)+"_factor_"+str(i+1)
         plot_factor(target_img, source_img, filename)
 
 
@@ -76,7 +58,7 @@ def map_to_grid(image_vec, voxel_coords, view_lut):
     return new_image
 
 # Plots the image in the provided subplot
-def create_plot_im(ax, img):
+def create_plot_im(ax, img, limits):
     #Find colormap range
     imgMin = np.nanmin(img)
     imgMax = np.nanmax(img)
