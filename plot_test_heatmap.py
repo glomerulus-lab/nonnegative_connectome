@@ -1,6 +1,4 @@
 import argparse
-import scipy.io
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns # for heatmap generation
 import os
