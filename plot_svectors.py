@@ -58,7 +58,7 @@ def map_to_grid(image_vec, voxel_coords, view_lut):
     return new_image
 
 # Plots the image in the provided subplot
-def create_plot_im(ax, img, limits):
+def create_plot_im(ax, img):
     #Find colormap range
     imgMin = np.nanmin(img)
     imgMax = np.nanmax(img)
