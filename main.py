@@ -73,8 +73,8 @@ if __name__ == '__main__':
         print("Plotting...")
         if(testname == "test"):
 
-            plot_test_heatmap.creat_heatmap(Y, Z, "plots/test/greedy_solution")
-            plot_test_heatmap.creat_heatmap(W, H, "plots/test/nonneg_init")
+            plot_test_heatmap.create_heatmap(Y, Z, "plots/test/greedy_solution")
+            plot_test_heatmap.create_heatmap(W, H, "plots/test/nonneg_init")
             plot_test_heatmap.create_heatmap(W_k, H_k, "plots/test/nonnegative_solution")
             plot_test_heatmap.create_heatmap_test_truth("plots/test/test_truth")
             plot_cost.plot_1(costs,
