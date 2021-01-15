@@ -18,6 +18,9 @@ example invocation:
 ./run_matlab.sh test_allvis_completion
 ```
 
+https://github.com/harrispopgen/mushi
+
+
 ## main.py 
 Computes nonnegative connectome solution using greedy solution.
 
@@ -35,6 +38,10 @@ python3 main.py top_view -greedy -plot
 
 ## nonnegative_factorization
 Module containing code for computing the nonnegative connectome. Used by main.py
+Note: contains acc_prox_grad_method function from: 
+https://github.com/harrispopgen/mushi/blob/master/mushi/optimization.py
+https://github.com/harrispopgen/mushi/blob/master/LICENSE
+
 
 ## plot_svectors.py
 Visualize dominant singular vectors of solution. Based on plot_svectors.m in lowrank_connectome/matlab. used by main.py
