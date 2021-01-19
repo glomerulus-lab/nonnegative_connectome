@@ -19,7 +19,7 @@ def alternating_pgd(U, V,
     V_k = V
     k = 0
     while(k < max_outer_iter):
-        print(k, "Starting U")
+        # print(k, "Starting U")
         # Prepare functions in terms of U_k
         cost_U_k = lambda U_k: cost_func(U_k, V_k)
         grad_U_k = lambda U_k: grad_func_U(U_k, V_k)
@@ -36,7 +36,7 @@ def alternating_pgd(U, V,
             print("Error: indicator function for U true. Exiting...")
             exit()
 
-        print(k, "Starting V")
+        # print(k, "Starting V")
         # Prepare functions in terms of V_k
         cost_V_k = lambda V_k: cost_func(U_k, V_k)
         grad_V_k = lambda V_k: grad_func_V(U_k, V_k)
@@ -56,16 +56,15 @@ def alternating_pgd(U, V,
             exit()
         
         k+=1
-        print(k, "Calculating Cost")
+        # print(k, "Calculating Cost")
         if(calculate_cost):
             cost = cost_func(U_k, V_k)
             print(k, cost)
             costs.append(cost)
 
-    if(calculate_cost):
-        return U_k, V_k, costs
-    else:
-        return U_k, V_k                
+
+    return U_k, V_k, costs
+             
 
 
 
