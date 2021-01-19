@@ -43,7 +43,7 @@ def saveToMatFile(W, H, testname, suffix):
     data["W"][0] = [W]
     data["W"][1] = [np.transpose(H)]
     rank = W.shape[1]
-    scipy.io.savemat("data/nonnegative_"+testname+"_", data)
+    scipy.io.savemat("data/nonnegative_"+testname+"_"+suffix, data)
     
 
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     print("Saving final solution...")
-    saveToMatFile(W, H, testname, "final")
+    saveToMatFile(U, V, testname, "final")
 
     if(args.plot):
         print("Plotting...")
