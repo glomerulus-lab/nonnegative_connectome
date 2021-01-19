@@ -6,6 +6,7 @@ import plot_svectors
 import plot_cost
 import load_mat
 import nonnegative_initialization
+import nonnegative_connectome
 import timeit
 
 
@@ -36,13 +37,13 @@ def hyperparameterStr():
 # W should have shape (nx * r)
 # H should have shape (r * ny)
 # Where r is the rank of the nonnegative factors.
-def saveToMatFile(testname, W, H):
+def saveToMatFile(W, H, testname, suffix):
     
     data = {"W":np.empty((2,1), dtype=object)}
     data["W"][0] = [W]
     data["W"][1] = [np.transpose(H)]
     rank = W.shape[1]
-    scipy.io.savemat("data/nonnegative_"+testname+"_r_"+str(rank)+"_"+hyperparameterStr()+".mat", data)
+    scipy.io.savemat("data/nonnegative_"+testname+"_", data)
     
 
 
@@ -64,8 +65,26 @@ if __name__ == '__main__':
                                     max_line_iter = hp["max_line_iter"],
                                     calculate_cost = True)
 
-    print("Saving data...")
-    # saveToMatFile(testname, W_k, H_k)
+    print("Saving refined initialization...")
+    saveToMatFile(W, H, testname, "refined_init")
+
+    print("Starting nonnegative regression problem")
+    if(testname=="top_view"):
+        lamb = 1e6
+    elif(testname=="flatmap"):
+        lamb = 3e7
+    else:
+        lamb = 100
+    U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
+                                    testname,
+                                    lamb,
+                                    max_outer_iter = hp["max_outer_iter"],
+                                    max_inner_iter = hp["max_inner_iter"],
+                                    max_line_iter = hp["max_line_iter"],
+                                    calculate_cost = True)
+
+    print("Saving final solution...")
+    saveToMatFile(W, H, testname, "final")
 
     if(args.plot):
         print("Plotting...")
