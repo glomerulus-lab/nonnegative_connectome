@@ -5,7 +5,7 @@ import plot_test_heatmap
 import plot_svectors
 import plot_cost
 import load_mat
-import nonnegative_factorization as nf
+import nonnegative_initialization
 import timeit
 
 
@@ -13,16 +13,18 @@ import timeit
 parser = argparse.ArgumentParser(description="Computes non-negative factors given greedy solution.")
 # Arguments
 parser.add_argument('testname',  type=str, nargs=1, help='Name of test to compute nonnegative factors')
+parser.add_argument('max_outer_iter',  type=str, nargs=1, help='')
+parser.add_argument('max_inner_iter',  type=str, nargs=1, help='')
+parser.add_argument('max_line_iter',  type=str, nargs=1, help='')
 # Flags
 parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
 parser.add_argument('-plot', dest='plot', action='store_true',help='Plot the solution as a heatmap using plot_test_heatmap.py')
 
 # hyperperameters
 hp = {
-    'max_outer_iter': 50,
-    'max_inner_iter': 50,
+    'max_outer_iter': 10,
+    'max_inner_iter': 10,
     'max_line_iter': 100
-
 }
 
 def hyperparameterStr():
@@ -48,26 +50,22 @@ def saveToMatFile(testname, W, H):
 if __name__ == '__main__':
     args = parser.parse_args()
     testname = args.testname[0]
+    hp["max_outer_iter"] = int(args.max_outer_iter[0])
+    hp["max_inner_iter"] = int(args.max_inner_iter[0])
+    hp["max_line_iter"]  = int(args.max_line_iter[0])
 
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(testname+"_solution", args.greedy)
 
     print("Initializing nonnegative solution")
-    W, H = nf.initialize_nonnegative_factors(Y, Z)
-
-    print("Starting alternating PGD")
-    W_k, H_k, costs = nf.alternating_pgd(Y, Z, W, H, 
-                                    nf.frobenius_squared_trace,
-                                    nf.grad_frobenius_squared,
-                                    nf.indicator_positive,
-                                    nf.proj_nonnegative,
+    W, H, costs = nonnegative_initialization.refined_init_nonnegative_factors(Y, Z, 
                                     max_outer_iter = hp["max_outer_iter"],
                                     max_inner_iter = hp["max_inner_iter"],
-                                    max_line_iter = hp["max_line_iter"])
-
+                                    max_line_iter = hp["max_line_iter"],
+                                    calculate_cost = True)
 
     print("Saving data...")
-    saveToMatFile(testname, W_k, H_k)
+    # saveToMatFile(testname, W_k, H_k)
 
     if(args.plot):
         print("Plotting...")
@@ -75,7 +73,6 @@ if __name__ == '__main__':
 
             plot_test_heatmap.create_heatmap(Y, Z, "plots/test/greedy_solution")
             plot_test_heatmap.create_heatmap(W, H, "plots/test/nonneg_init")
-            plot_test_heatmap.create_heatmap(W_k, H_k, "plots/test/nonnegative_solution")
             plot_test_heatmap.create_heatmap_test_truth("plots/test/test_truth")
             plot_cost.plot_1(costs,
                 range(len(costs)),
