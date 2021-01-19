@@ -55,3 +55,11 @@ def load_voxel_coords(testname):
     except:
         print("'Voxel coordinates from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
+
+def load_all_matricies_data(testname):
+    try:
+        data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
+        return  data
+    except:
+        print("'Matricies data from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
+        exit(1)
