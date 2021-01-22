@@ -30,7 +30,8 @@ def alternating_pgd(U, V,
                                     indicator_func, 
                                     projection_func, 
                                     max_iter=max_inner_iter, 
-                                    max_line_iter=max_line_iter)
+                                    max_line_iter=max_line_iter,
+                                    gamma=0.5)
 
         if(indicator_func(U_k) > 0):
             print("Error: indicator function for U true. Exiting...")
@@ -49,7 +50,8 @@ def alternating_pgd(U, V,
                                     indicator_func, 
                                     projection_func, 
                                     max_iter=max_inner_iter, 
-                                    max_line_iter=max_line_iter)
+                                    max_line_iter=max_line_iter,
+                                    gamma=0.5)
 
         if(indicator_func(V_k) > 0):
             print("Error: indicator function for V true. Exitting...")
@@ -82,7 +84,7 @@ def acc_prox_grad_method(x: np.ndarray,  # noqa: C901
                          max_iter: int = 100,
                          s0: np.float64 = 1,
                          max_line_iter: int = 100,
-                         gamma: np.float64 = 0.8,
+                         gamma: np.float64 = 0.5,
                          verbose: bool = False) -> np.ndarray:
     r"""Nesterov accelerated proximal gradient method with backtracking line
     search [1]_.
