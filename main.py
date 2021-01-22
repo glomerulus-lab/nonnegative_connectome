@@ -49,14 +49,31 @@ def saveToMatFile(W, H, testname, suffix):
 
 
 if __name__ == '__main__':
+
     args = parser.parse_args()
     testname = args.testname[0]
     hp["max_outer_iter"] = int(args.max_outer_iter[0])
     hp["max_inner_iter"] = int(args.max_inner_iter[0])
     hp["max_line_iter"]  = int(args.max_line_iter[0])
 
+    data = load_mat.load_all_matricies_data(testname)
+    if(testname=="top_view"):
+        lamb = 1e6
+    elif(testname=="flatmap"):
+        lamb = 3e7
+    else:
+        lamb = 100
+
+    # dimensionless regularization parameter
+    lamb = lamb * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
+
+
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(testname+"_solution", args.greedy)
+
+    print("Greedy solution cost:", 
+            nonnegative_connectome.regularized_cost(Y, Z.T, 
+            data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"]))
 
     print("Initializing nonnegative solution")
     W, H, costs = nonnegative_initialization.refined_init_nonnegative_factors(Y, Z, 
@@ -65,18 +82,17 @@ if __name__ == '__main__':
                                     max_line_iter = hp["max_line_iter"],
                                     calculate_cost = True)
 
+    print("Nonnegative initialization cost:", 
+        nonnegative_connectome.regularized_cost(W, H.T, 
+        data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"]))
+
     print("Saving refined initialization...")
     saveToMatFile(W, H, testname, "refined_init")
 
     print("Starting nonnegative regression problem")
-    if(testname=="top_view"):
-        lamb = 1e6
-    elif(testname=="flatmap"):
-        lamb = 3e7
-    else:
-        lamb = 100
+
     U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
-                                    testname,
+                                    data["X"], data["Y"], data["Lx"], data["Ly"], data["Omega"],
                                     lamb,
                                     max_outer_iter = hp["max_outer_iter"],
                                     max_inner_iter = hp["max_inner_iter"],
@@ -89,7 +105,6 @@ if __name__ == '__main__':
     if(args.plot):
         print("Plotting...")
         if(testname == "test"):
-
             plot_test_heatmap.create_heatmap(Y, Z, "plots/test/greedy_solution")
             plot_test_heatmap.create_heatmap(W, H, "plots/test/nonneg_init")
             plot_test_heatmap.create_heatmap_test_truth("plots/test/test_truth")
