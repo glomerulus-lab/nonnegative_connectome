@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Callable
+import math_util
+
 
 def alternating_pgd(U, V, 
                     cost_func,
@@ -7,6 +9,7 @@ def alternating_pgd(U, V,
                     grad_func_V,
                     indicator_func,
                     projection_func,
+                    tol=1e-10,
                     max_outer_iter = 10,
                     max_inner_iter = 10,
                     max_line_iter = 100,
@@ -18,17 +21,23 @@ def alternating_pgd(U, V,
     U_k = U
     V_k = V
     k = 0
+    prev_fro_norm = -2 * tol
     while(k < max_outer_iter):
-        # print(k, "Starting U")
+        k+=1
+        prev_U = U_k
+        prev_V = V_k
+
         # Prepare functions in terms of U_k
         cost_U_k = lambda U_k: cost_func(U_k, V_k)
         grad_U_k = lambda U_k: grad_func_U(U_k, V_k)
 
+        #Perform PGD on U_k
         U_k = acc_prox_grad_method( U_k, 
                                     cost_U_k, 
                                     grad_U_k, 
                                     indicator_func, 
-                                    projection_func, 
+                                    projection_func,
+                                    tol=1e-10, 
                                     max_iter=max_inner_iter, 
                                     max_line_iter=max_line_iter,
                                     gamma=0.5)
@@ -37,18 +46,18 @@ def alternating_pgd(U, V,
             print("Error: indicator function for U true. Exiting...")
             exit()
 
-        # print(k, "Starting V")
+
         # Prepare functions in terms of V_k
         cost_V_k = lambda V_k: cost_func(U_k, V_k)
         grad_V_k = lambda V_k: grad_func_V(U_k, V_k)
 
-        
-        #Note: Must transpose V on input, and transpose return value
+        # Perform PGD on V_k
         V_k = acc_prox_grad_method( V_k, 
                                     cost_V_k, 
                                     grad_V_k, 
                                     indicator_func, 
-                                    projection_func, 
+                                    projection_func,
+                                    tol=1e-10, 
                                     max_iter=max_inner_iter, 
                                     max_line_iter=max_line_iter,
                                     gamma=0.5)
@@ -57,17 +66,19 @@ def alternating_pgd(U, V,
             print("Error: indicator function for V true. Exitting...")
             exit()
         
-        k+=1
-        # print(k, "Calculating Cost")
+        
         if(calculate_cost):
             cost = cost_func(U_k, V_k)
             print(k, cost)
             costs.append(cost)
-
+            
+        fro_norm_sq = np.trace(V_k @ V_k.T @ U_k.T @ U_k)
+        if(math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
+            print("tolerance reached")
+            break   
 
     return U_k, V_k, costs
              
-
 
 
 
