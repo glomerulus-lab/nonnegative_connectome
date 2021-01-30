@@ -1,126 +1,133 @@
 import argparse
 import scipy.io
 import numpy as np
-import plot_test_heatmap
-import plot_svectors
-import plot_cost
 import load_mat
 import nonnegative_initialization
 import nonnegative_connectome
-import timeit
+import time
 
 
 
 parser = argparse.ArgumentParser(description="Computes non-negative factors given greedy solution.")
 # Arguments
-parser.add_argument('testname',  type=str, nargs=1, help='Name of test to compute nonnegative factors')
-parser.add_argument('max_outer_iter',  type=str, nargs=1, help='')
-parser.add_argument('max_inner_iter',  type=str, nargs=1, help='')
-parser.add_argument('max_line_iter',  type=str, nargs=1, help='')
+parser.add_argument('testname',  type=str, help='Name of test to compute nonnegative factors')
+parser.add_argument('solution_name', type=str, help='Name of greedy solution to initialize with,')
+parser.add_argument('output_suffix',  type=str, help='')
+parser.add_argument('init_max_outer_iter',  type=int, help='')
+parser.add_argument('init_max_inner_iter',  type=int, help='')
+parser.add_argument('init_max_line_iter',  type=int,help='')
+parser.add_argument('max_outer_iter',  type=int, help='')
+parser.add_argument('max_inner_iter',  type=int, help='')
+parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
-parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-plot', dest='plot', action='store_true',help='Plot the solution as a heatmap using plot_test_heatmap.py')
+parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
+parser.add_argument('-tol', default=1e-10, help="PGD stopping criteria tolerance")
 
 # hyperperameters
 hp = {
+    'init_max_outer_iter': 10,
+    'init_max_inner_iter': 10,
+    'init_max_line_iter': 100,
     'max_outer_iter': 10,
     'max_inner_iter': 10,
     'max_line_iter': 100
 }
 
-def hyperparameterStr():
-    return '_'.join(str(x) for x in hp.values())
-
-
-# Saves nonnegative factors W, H to 'nonnegative_<testname>_r_<rank>.mat'
-# Expects W, H such that X = W @ H
-# W should have shape (nx * r)
-# H should have shape (r * ny)
-# Where r is the rank of the nonnegative factors.
-def saveToMatFile(W, H, testname, suffix):
-    
-    data = {"W":np.empty((2,1), dtype=object)}
-    data["W"][0] = [W]
-    data["W"][1] = [np.transpose(H)]
-    rank = W.shape[1]
-    scipy.io.savemat("data/nonnegative_"+testname+"_"+suffix, data)
-    
-
-
+  
 
 if __name__ == '__main__':
 
-    args = parser.parse_args()
-    testname = args.testname[0]
-    hp["max_outer_iter"] = int(args.max_outer_iter[0])
-    hp["max_inner_iter"] = int(args.max_inner_iter[0])
-    hp["max_line_iter"]  = int(args.max_line_iter[0])
+    # Parse arguments
+    hp = vars(parser.parse_args())
+    
+    time_results = {}
+    start_time = time.time()
+    # Load data for problem setup
+    data = load_mat.load_all_matricies_data(hp["testname"])
+    cost_function = lambda W, H: nonnegative_connectome.regularized_cost(W, H.T, 
+            data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"])
 
-    data = load_mat.load_all_matricies_data(testname)
-    if(testname=="top_view"):
+    #Use fixed values for lambda for consistency
+    if(hp["testname"]=="top_view"):
         lamb = 1e6
-    elif(testname=="flatmap"):
+    elif(hp["testname"]=="flatmap"):
         lamb = 3e7
     else:
         lamb = 100
 
-    # dimensionless regularization parameter
-    lamb = lamb * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
+    # make regularization parameter dimensionless
+    hp["lamb_reg"] = lamb * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
 
+    time_results["problem_setup"] = time.time() - start_time
+    start_time = time.time()
 
+    #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
-    Y, Z = load_mat.load_solution(testname+"_solution", args.greedy)
+    Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
 
-    print("Greedy solution cost:", 
-            nonnegative_connectome.regularized_cost(Y, Z.T, 
-            data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"]))
+    time_results["load_greedy"] = time.time() - start_time
 
-    print("Initializing nonnegative solution")
-    W, H, costs = nonnegative_initialization.refined_init_nonnegative_factors(Y, Z, 
-                                    max_outer_iter = hp["max_outer_iter"],
-                                    max_inner_iter = hp["max_inner_iter"],
-                                    max_line_iter = hp["max_line_iter"],
+    # Get greedy cost
+    greedy_cost = cost_function(Y, Z)
+    print("Greedy solution cost:", greedy_cost)
+    
+    start_time = time.time()
+
+    print("Initializing nonnegative solution")        
+    W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
+
+    time_results["initialization"] = time.time() - start_time
+
+    # Get initialization cost
+    nonneg_init_cost = cost_function(W, H)
+    print("Nonnegative initialization cost:", nonneg_init_cost)
+
+    start_time = time.time()
+
+    # Refine nonnegative initialization bith alternating PGD 
+    print("Refining nonnegative solution")
+    W, H, init_costs = nonnegative_initialization.refine_nonnegative_factors(W, H, Y, Z,
+                                    tol=hp["tol"], 
+                                    max_outer_iter = hp["init_max_outer_iter"],
+                                    max_inner_iter = hp["init_max_inner_iter"],
+                                    max_line_iter = hp["init_max_line_iter"],
                                     calculate_cost = True)
 
-    print("Nonnegative initialization cost:", 
-        nonnegative_connectome.regularized_cost(W, H.T, 
-        data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"]))
+    time_results["refining"] = time.time() - start_time
 
-    print("Saving refined initialization...")
-    saveToMatFile(W, H, testname, "refined_init")
+    # Get refined cost
+    refined_nonneg_cost = cost_function(W, H)
+    print("Refined nonnegative cost:", refined_nonneg_cost)
+
+    start_time = time.time()
 
     print("Starting nonnegative regression problem")
-
     U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
                                     data["X"], data["Y"], data["Lx"], data["Ly"], data["Omega"],
                                     lamb,
+                                    tol=hp["tol"],
                                     max_outer_iter = hp["max_outer_iter"],
                                     max_inner_iter = hp["max_inner_iter"],
                                     max_line_iter = hp["max_line_iter"],
                                     calculate_cost = True)
 
-    print("Saving final solution...")
-    saveToMatFile(U, V, testname, "final")
+    time_results["final_solution"] = time.time() - start_time     
 
-    if(args.plot):
-        print("Plotting...")
-        if(testname == "test"):
-            plot_test_heatmap.create_heatmap(Y, Z, "plots/test/greedy_solution")
-            plot_test_heatmap.create_heatmap(W, H, "plots/test/nonneg_init")
-            plot_test_heatmap.create_heatmap_test_truth("plots/test/test_truth")
-            plot_cost.plot_1(costs,
-                range(len(costs)),
-                "Cost vs Iteration ("+hyperparameterStr()+")",
-                "Cost",
-                "Iteration",
-                "plots/test/test_cost_"+hyperparameterStr())
-        else:
-            
-            plot_svectors.plot_svectors(W, H, testname, "nonneg_" + testname + hyperparameterStr(),3)
-            plot_cost.plot_1(costs,
-                range(len(costs)),
-                "Cost vs Iteration ("+hyperparameterStr()+")",
-                "Cost",
-                "Iteration",
-                "plots/"+testname+"_cost_"+hyperparameterStr())
+
+    print("Saving final solution with hyperparameters and experiment results...")
+    data = {"W":np.empty((2,1), dtype=object)}
+    data["W"][0] = [U]
+    data["W"][1] = [V.T]
+    data["init_costs"] = init_costs
+    data["costs"] = costs
+    for key in hp.keys():
+        data["hp_"+key] = hp[key]
+    
+    for key in time_results.keys():
+        data["time_"+key] = time_results[key]
+
+    scipy.io.savemat("data/nonnegative_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", data)
     print("Done")
+
+    
+    
