@@ -56,7 +56,7 @@ def load_voxel_coords(testname):
         print("'Voxel coordinates from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
 
-def load_all_matricies_data(testname):
+def load_all_matricies(testname):
     try:
         data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
         data["Omega"] = data["Omega"].astype(np.int8)
