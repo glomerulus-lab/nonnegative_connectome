@@ -1,6 +1,6 @@
 import numpy as np
-from typing import Callable
 import alt_acc_prox_grad
+import math_util
 
 # Steps 1-3 of Atif et al
 # Expects Y, Z such that X = Y @ Z
@@ -55,56 +55,26 @@ def init_nonnegative_factors(Y, Z):
                     ):
     '''
 
-def refined_init_nonnegative_factors(Y, Z, 
-                                    max_outer_iter = 10,
-                                    max_inner_iter = 10,
-                                    max_line_iter = 100,
-                                    calculate_cost = False
-                                    ):
-    W, H = init_nonnegative_factors(Y,Z)
-    
+def refine_nonnegative_factors(W, H, Y, Z,
+                                tol=1e-7,
+                                max_outer_iter = 10,
+                                max_inner_iter = 10,
+                                max_line_iter = 100,
+                                calculate_cost = False
+                                ):
+   
     print("Starting nonnegative factor refinement with PGD")
     W, H, costs = alt_acc_prox_grad.alternating_pgd(
                     W, H, 
-                    lambda W, H: frobenius_squared_trace(W, H, Y, Z),
-                    lambda W, H: grad_frobenius_squared(W, H, Y, Z),
-                    lambda W, H: grad_frobenius_squared(H.T, W.T, Z.T, Y.T).T, # note transpose
-                    indicator_positive,
-                    proj_nonnegative,
+                    lambda W, H: math_util.factorized_difference_frobenius_sq(W, H, Y, Z),
+                    lambda W, H: math_util.grad_factorized_difference_frobenius_sq(W, H, Y, Z),
+                    lambda W, H: math_util.grad_factorized_difference_frobenius_sq(H.T, W.T, Z.T, Y.T).T, # note transpose of result
+                    math_util.indicate_positive,
+                    math_util.proj_nonnegative,
+                    tol,
                     max_outer_iter,
                     max_inner_iter,
                     max_line_iter,
                     calculate_cost
                     )
     return W, H, costs
-   
-
-
-#Cost, gradient, inicator, projection functions for use with alt_acc_prox_grad.py
-
-# ||YZ-WH||F^2 using trace
-def frobenius_squared_trace(W, H, Y, Z):
-    # print("frobenius_squared_trace", W.shape, H.shape, Y.shape, Z.shape)
-    trace1 = np.trace(H @ H.T @ W.T @ W)
-    trace2 = np.trace(Z @ Z.T @ Y.T @ Y)
-    trace3 = np.trace(H @ Z.T @ Y.T @ W)
-    return trace1 + trace2 - 2*trace3
-
-# grad_W( ||YZ-WH||F^2 )
-def grad_frobenius_squared(W, H, Y, Z):
-    # print("grad_frobenius_squared", W.shape, H.shape, Y.shape, Z.shape)
-    return 2 * (W @ (H @ H.T) - (Y @ (Z @ H.T)) )
-
-
-# Return maximum cost if X has any elements < 0
-def indicator_positive(X):
-    if(X[X<0].size > 0):
-        return np.finfo(X.dtype).max
-    else:
-        return 0
-
-# Project Matrix X to nonnegative by setting all negative elements to 0.
-# step size parameter 's' ignored (required for use as prox argument in for acc_prox_grad_method)
-def proj_nonnegative(X, s=None):
-    X[X<0] = 0
-    return X
