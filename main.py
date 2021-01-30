@@ -21,17 +21,8 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
+parser.add_argument('-init_tol', default=1e-10, help="PGD stopping criteria tolerance for initialization refinement")
 parser.add_argument('-tol', default=1e-10, help="PGD stopping criteria tolerance")
-
-# hyperperameters
-hp = {
-    'init_max_outer_iter': 10,
-    'init_max_inner_iter': 10,
-    'init_max_line_iter': 100,
-    'max_outer_iter': 10,
-    'max_inner_iter': 10,
-    'max_line_iter': 100
-}
 
   
 
@@ -43,7 +34,7 @@ if __name__ == '__main__':
     time_results = {}
     start_time = time.time()
     # Load data for problem setup
-    data = load_mat.load_all_matricies_data(hp["testname"])
+    data = load_mat.load_all_matricies(hp["testname"])
     cost_function = lambda W, H: nonnegative_connectome.regularized_cost(W, H.T, 
             data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"])
 
@@ -87,7 +78,7 @@ if __name__ == '__main__':
     # Refine nonnegative initialization bith alternating PGD 
     print("Refining nonnegative solution")
     W, H, init_costs = nonnegative_initialization.refine_nonnegative_factors(W, H, Y, Z,
-                                    tol=hp["tol"], 
+                                    tol=hp["init_tol"], 
                                     max_outer_iter = hp["init_max_outer_iter"],
                                     max_inner_iter = hp["init_max_inner_iter"],
                                     max_line_iter = hp["init_max_line_iter"],
@@ -118,8 +109,11 @@ if __name__ == '__main__':
     data = {"W":np.empty((2,1), dtype=object)}
     data["W"][0] = [U]
     data["W"][1] = [V.T]
-    data["init_costs"] = init_costs
-    data["costs"] = costs
+    data["costs_init_pgd"] = init_costs
+    data["costs_pgd"] = costs
+    data["cost_greedy"] = greedy_cost
+    data["cost_init"] = nonneg_init_cost
+    data["cost_refined"] = refined_nonneg_cost
     for key in hp.keys():
         data["hp_"+key] = hp[key]
     
