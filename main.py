@@ -21,8 +21,8 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-init_tol', default=1e-10, help="PGD stopping criteria tolerance for initialization refinement")
-parser.add_argument('-tol', default=1e-10, help="PGD stopping criteria tolerance")
+parser.add_argument('-init_tol', type=float, default=1e-5, help="PGD stopping criteria tolerance for initialization refinement")
+parser.add_argument('-tol', type=float, default=1e-5, help="PGD stopping criteria tolerance")
 
   
 
@@ -35,19 +35,21 @@ if __name__ == '__main__':
     start_time = time.time()
     # Load data for problem setup
     data = load_mat.load_all_matricies(hp["testname"])
-    cost_function = lambda W, H: nonnegative_connectome.regularized_cost(W, H.T, 
-            data["X"], data["Y"], data["Lx"], data["Ly"], lamb, data["Omega"])
+
 
     #Use fixed values for lambda for consistency
     if(hp["testname"]=="top_view"):
-        lamb = 1e6
+        hp["lamb"] = 1e6
     elif(hp["testname"]=="flatmap"):
-        lamb = 3e7
+        hp["lamb"] = 3e7
     else:
-        lamb = 100
+        hp["lamb"] = 100
 
     # make regularization parameter dimensionless
-    hp["lamb_reg"] = lamb * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
+    hp["lamb_reg"] = hp["lamb"] * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
+
+    cost_function = lambda W, H: nonnegative_connectome.regularized_cost(W, H.T, 
+            data["X"], data["Y"], data["Lx"], data["Ly"], hp["lamb_reg"], data["Omega"])
 
     time_results["problem_setup"] = time.time() - start_time
     start_time = time.time()
@@ -95,7 +97,7 @@ if __name__ == '__main__':
     print("Starting nonnegative regression problem")
     U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
                                     data["X"], data["Y"], data["Lx"], data["Ly"], data["Omega"],
-                                    lamb,
+                                    hp["lamb_reg"],
                                     tol=hp["tol"],
                                     max_outer_iter = hp["max_outer_iter"],
                                     max_inner_iter = hp["max_inner_iter"],
@@ -104,6 +106,9 @@ if __name__ == '__main__':
 
     time_results["final_solution"] = time.time() - start_time     
 
+    # Get refined cost
+    final_nonneg_cost = cost_function(U, V)
+    print("Final nonnegative cost:", final_nonneg_cost)
 
     print("Saving final solution with hyperparameters and experiment results...")
     data = {"W":np.empty((2,1), dtype=object)}
@@ -114,6 +119,7 @@ if __name__ == '__main__':
     data["cost_greedy"] = greedy_cost
     data["cost_init"] = nonneg_init_cost
     data["cost_refined"] = refined_nonneg_cost
+    data["cost_final"] = final_nonneg_cost
     for key in hp.keys():
         data["hp_"+key] = hp[key]
     
