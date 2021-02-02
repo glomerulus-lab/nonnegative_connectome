@@ -16,7 +16,7 @@ def alternating_pgd(U, V,
                     calculate_cost = False
                     ):
 
-    costs = []
+    costs = [cost_func(U, V)]
 
     U_k = U
     V_k = V
@@ -74,11 +74,12 @@ def alternating_pgd(U, V,
             
         fro_norm_sq = np.trace(V_k @ V_k.T @ U_k.T @ U_k)
         if(math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
-            print("tolerance reached")
             break   
     
-        if(calculate_cost):
-            print("")
+    print()
+    if(k < max_outer_iter):
+        print("Tolerance reached.")
+
 
     return U_k, V_k, costs
              
