@@ -10,6 +10,8 @@ import palettable # https://jiffyclub.github.io/palettable/
 
 
 
+
+
 parser = argparse.ArgumentParser(description='Plot dominant factors of connectome solution')
 # Arguments
 parser.add_argument('testname',         type=str, nargs=1, help='Name of test to plot. "flatmap" or "top_view"')
@@ -17,17 +19,41 @@ parser.add_argument('solution_name',    type=str, nargs=1, help='Name of .mat so
 parser.add_argument('n',                type=str, nargs=1, help='number of factors to plot')
 # Flags
 parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-raw',    action='store_true', help='Plot raw solution, rather than scaled QR decompositions.')
+parser.add_argument('-nneg',    action='store_true', help='Plot reordered & scaled solution, rather than scaled QR decomposition.')
 
 
-def plot_svectors(U, V, testname, output_name, n, raw=False):
+def plot_svectors(U, V, testname, output_name, n, nneg=False):
     voxel_coords_source, voxel_coords_target, view_lut = load_mat.load_voxel_coords(testname)
 
-    if(raw):
-        outputpath = 'plots/raw/'
+    if(nneg):
+        outputpath = 'plots/nneg/'
 
         Q1 = U.copy()
         Q2 = (V.T).copy()
+
+        r = Q1.shape[1]
+        factor_norms_sq = np.zeros(r)
+
+        for rank in range(r):
+            # Q1_r = Q1[:, rank][:, np.newaxis]
+            # Q2_r = Q2[:, rank][:, np.newaxis].T
+            
+            Q1_r = Q1[:, rank]
+            Q2_r = Q2[:, rank]
+            
+            Q2_norm = np.linalg.norm(Q2_r)
+
+            #factor_norms_sq[rank] = np.trace(Q2_r @ Q2_r.T @ Q1_r.T @ Q1_r)
+            factor_norms_sq[rank] = np.linalg.norm(Q1_r) *Q2_norm 
+
+            Q1[:, rank] *= Q2_norm
+            Q2[:, rank] /= Q2_norm
+
+        indexlist = np.argsort(factor_norms_sq)
+        
+        Q1 = Q1[:, indexlist]
+        Q2 = Q2[:, indexlist]
+
     else:
         outputpath = 'plots/qr/'
 
@@ -36,7 +62,7 @@ def plot_svectors(U, V, testname, output_name, n, raw=False):
         u, S, vh = np.linalg.svd(R1 @ (R2.T) )
         Q1 = Q1 @ u * S
         Q2 = Q2 @ vh.T
-
+    
 
     if not os.path.exists('plots'):
         os.makedirs('plots')   
@@ -71,7 +97,7 @@ def create_plot_im(ax, img):
     #Find colormap range
     imgMin = np.nanmin(img)
     imgMax = np.nanmax(img)
-    colormapLimit = max(np.abs(imgMin), np.abs(imgMax))
+    colormapLimit = max(np.abs(imgMin), np.abs(imgMax)) * 0.9
 
     #Include blue in colormap if any values are negative
     if(imgMin < 0):
@@ -110,5 +136,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     U, V = load_mat.load_solution(args.solution_name[0], args.greedy)
-    plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.raw)
+    plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.nneg)
     

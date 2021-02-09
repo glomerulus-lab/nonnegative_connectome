@@ -26,3 +26,15 @@ def plot_1(y, x, title, ylabel, xlabel, filename, xlog=False, yLog=False):
     plt.title(title)
     plt.savefig(filename)
     plt.close()
+
+def plot_all_cost(y, max_x, y1, y2, filename):
+    plt.figure()
+    plt.clf()
+    plt.plot(range(max_x), y, "b-")
+    plt.plot([0,max_x], [y1, y1], ".r-",label="Greedy Cost")
+    plt.plot([0,max_x], [y2, y2], ".r-",label="Refined Nonneg Cost")
+    plt.xlabel("Iteration")
+    plt.ylabel("Cost")
+    plt.title("Cost vs Iteration compared to Initialization")
+    plt.savefig(filename)
+    plt.close()

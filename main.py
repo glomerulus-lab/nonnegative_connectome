@@ -21,8 +21,8 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-init_tol', type=float, default=1e-5, help="PGD stopping criteria tolerance for initialization refinement")
-parser.add_argument('-tol', type=float, default=1e-5, help="PGD stopping criteria tolerance")
+parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
+parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
 
   
 
@@ -110,6 +110,7 @@ if __name__ == '__main__':
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)
 
+    # Save data to file
     print("Saving final solution with hyperparameters and experiment results...")
     data = {"W":np.empty((2,1), dtype=object)}
     data["W"][0] = [U]
@@ -128,6 +129,5 @@ if __name__ == '__main__':
 
     scipy.io.savemat("data/nonnegative_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", data)
     print("Done")
-
-    
-    
+    print(hp)
+    print(time_results)
