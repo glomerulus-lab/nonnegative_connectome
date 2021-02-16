@@ -73,7 +73,7 @@ def alternating_pgd(U, V,
             costs.append(cost)
             
         fro_norm_sq = np.trace(V_k @ V_k.T @ U_k.T @ U_k)
-        if(math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
+        if (math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
             break   
     
     print()
