@@ -2,7 +2,6 @@ import numpy as np
 from typing import Callable
 import math_util
 
-
 def alternating_pgd(U, V, 
                     cost_func,
                     grad_func_U,
@@ -30,7 +29,7 @@ def alternating_pgd(U, V,
         # Prepare functions in terms of U_k
         cost_U_k = lambda U_k: cost_func(U_k, V_k)
         grad_U_k = lambda U_k: grad_func_U(U_k, V_k)
-
+        # grad_U_k = jit(grad(cost_U_k))
         #Perform PGD on U_k
         U_k = acc_prox_grad_method( U_k, 
                                     cost_U_k, 
@@ -50,7 +49,7 @@ def alternating_pgd(U, V,
         # Prepare functions in terms of V_k
         cost_V_k = lambda V_k: cost_func(U_k, V_k)
         grad_V_k = lambda V_k: grad_func_V(U_k, V_k)
-
+        # grad_V_k = jit(grad(cost_V_k))
         # Perform PGD on V_k
         V_k = acc_prox_grad_method( V_k, 
                                     cost_V_k, 
@@ -71,7 +70,8 @@ def alternating_pgd(U, V,
             cost = cost_func(U_k, V_k)
             print(k, cost, end='\r', flush=True)
             costs.append(cost)
-            
+        else:
+             print(k,end='\r', flush=True)  
         fro_norm_sq = np.trace(V_k @ V_k.T @ U_k.T @ U_k)
         if(math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
             break   

@@ -1,11 +1,14 @@
 import argparse
 import scipy.io
-import numpy as np
+import jax.numpy as np
+import numpy
 import load_mat
 import nonnegative_initialization
 import nonnegative_connectome
 import time
 
+from jax.config import config
+config.update('jax_enable_x64', True)
 
 
 parser = argparse.ArgumentParser(description="Computes non-negative factors given greedy solution.")
@@ -21,12 +24,12 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
-parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
+parser.add_argument('-init_tol', type=float, default=1e-7, help="PGD stopping criteria tolerance for initialization refinement")
+parser.add_argument('-tol', type=float, default=1e-7, help="PGD stopping criteria tolerance")
 
   
+def main():
 
-if __name__ == '__main__':
 
     # Parse arguments
     hp = vars(parser.parse_args())
@@ -46,10 +49,15 @@ if __name__ == '__main__':
         hp["lamb"] = 100
 
     # make regularization parameter dimensionless
-    hp["lamb_reg"] = hp["lamb"] * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
-
-    cost_function = lambda W, H: nonnegative_connectome.regularized_cost(W, H.T, 
-            data["X"], data["Y"], data["Lx"], data["Ly"], hp["lamb_reg"], data["Omega"])
+    hp["lamb_reg"] = hp["lamb"] * (data["X"].shape[1] / data["X"].shape[0])  #(n_inj / n_x)
+    
+    cost_function = lambda W, H: nonnegative_connectome.regularized_cost( W, H.T,
+        data["X"], 
+        data["Y"], 
+        data["Lx"], 
+        data["Ly"], 
+        hp["lamb_reg"], 
+        data["Omega"])
 
     time_results["problem_setup"] = time.time() - start_time
     start_time = time.time()
@@ -57,7 +65,7 @@ if __name__ == '__main__':
     #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
-
+    print("Y", Y.shape)
     time_results["load_greedy"] = time.time() - start_time
 
     # Get greedy cost
@@ -68,6 +76,7 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
+    print("W", W.shape)
 
     time_results["initialization"] = time.time() - start_time
 
@@ -85,7 +94,7 @@ if __name__ == '__main__':
                                     max_inner_iter = hp["init_max_inner_iter"],
                                     max_line_iter = hp["init_max_line_iter"],
                                     calculate_cost = True)
-
+    print("W", W.shape)
     time_results["refining"] = time.time() - start_time
 
     # Get refined cost
@@ -103,7 +112,7 @@ if __name__ == '__main__':
                                     max_inner_iter = hp["max_inner_iter"],
                                     max_line_iter = hp["max_line_iter"],
                                     calculate_cost = True)
-
+    print("U", W.shape)
     time_results["final_solution"] = time.time() - start_time     
 
     # Get refined cost
@@ -112,7 +121,7 @@ if __name__ == '__main__':
 
     # Save data to file
     print("Saving final solution with hyperparameters and experiment results...")
-    data = {"W":np.empty((2,1), dtype=object)}
+    data = {"W":numpy.empty((2,1), dtype=object)}
     data["W"][0] = [U]
     data["W"][1] = [V.T]
     data["costs_init_pgd"] = init_costs
@@ -131,3 +140,7 @@ if __name__ == '__main__':
     print("Done")
     print(hp)
     print(time_results)
+
+
+if __name__ == '__main__':
+    main()

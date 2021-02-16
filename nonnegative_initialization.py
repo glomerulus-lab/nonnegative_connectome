@@ -1,7 +1,7 @@
 import numpy as np
 import alt_acc_prox_grad
 import math_util
-
+from jax import jit
 # Steps 1-3 of Atif et al
 # Expects Y, Z such that X = Y @ Z
 # Y shape (nx * p)
@@ -66,9 +66,9 @@ def refine_nonnegative_factors(W, H, Y, Z,
     print("Starting nonnegative factor refinement with PGD")
     W, H, costs = alt_acc_prox_grad.alternating_pgd(
                     W, H, 
-                    lambda W, H: math_util.factorized_difference_frobenius_sq(W, H, Y, Z),
-                    lambda W, H: math_util.grad_factorized_difference_frobenius_sq(W, H, Y, Z),
-                    lambda W, H: math_util.grad_factorized_difference_frobenius_sq(H.T, W.T, Z.T, Y.T).T, # note transpose of result
+                    jit(lambda W, H: math_util.factorized_difference_frobenius_sq(W, H, Y, Z)),
+                    jit(lambda W, H: math_util.grad_factorized_difference_frobenius_sq(W, H, Y, Z)),
+                    jit(lambda W, H: math_util.grad_factorized_difference_frobenius_sq(H.T, W.T, Z.T, Y.T).T), # note transpose of result
                     math_util.indicate_positive,
                     math_util.proj_nonnegative,
                     tol,

@@ -1,5 +1,5 @@
-import numpy as np
 import scipy.io
+import numpy as np
 
 
 # Loads solution factors from .mat file, returns U, V
@@ -59,9 +59,14 @@ def load_voxel_coords(testname):
 def load_all_matricies(testname):
     try:
         data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
-        data["Omega"] = data["Omega"].astype(np.int8)
-        data["Lx"] = data["Lx"].astype(np.int8)
-        data["Ly"] = data["Ly"].astype(np.int8)
+        
+        print(data["Lx"].shape)
+        print(data["Ly"].shape)
+
+        data["Omega"] = scipy.sparse.find(data["Omega"].astype(np.int8))
+        data["Lx"] = scipy.sparse.find(data["Lx"].astype(np.int8))
+        data["Ly"] = scipy.sparse.find(data["Ly"].astype(np.int8))
+        
         return  data
     except:
         print("'Matricies data from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
