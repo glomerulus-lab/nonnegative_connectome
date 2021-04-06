@@ -6,7 +6,7 @@ import nonnegative_initialization
 import nonnegative_connectome
 import time
 
-
+count = 0
 
 parser = argparse.ArgumentParser(description="Computes non-negative factors given greedy solution.")
 # Arguments
@@ -21,10 +21,24 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
-parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
 parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
+parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
+parser.add_argument('-alt_tol', type=float, default=1e-6, help="tolerance for alt_acc_prox_grad")
 
-  
+
+def balance_norms(Y, Z):
+    print(Y.shape, Z.shape)
+    rank = Y.shape[1]
+    for r in range(rank):
+        y_norm = np.linalg.norm(Y[:,r])
+        z_norm = np.linalg.norm(Z[r,:])
+
+        Y[:,r] *= np.sqrt(y_norm * z_norm) / y_norm
+        Z[r,:] *= np.sqrt(y_norm * z_norm) / z_norm
+
+    return Y, Z
+
+
 
 if __name__ == '__main__':
 
@@ -58,6 +72,11 @@ if __name__ == '__main__':
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
 
+    # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
+    Y, Z = balance_norms(Y, Z)
+    # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
+
+
     time_results["load_greedy"] = time.time() - start_time
 
     # Get greedy cost
@@ -68,6 +87,8 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
+
+    print("W, H init norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
 
     time_results["initialization"] = time.time() - start_time
 
@@ -81,15 +102,18 @@ if __name__ == '__main__':
     print("Refining nonnegative solution")
     W, H, init_costs = nonnegative_initialization.refine_nonnegative_factors(W, H, Y, Z,
                                     tol=hp["init_tol"], 
+                                    alt_tol=hp["alt_tol"],
                                     max_outer_iter = hp["init_max_outer_iter"],
                                     max_inner_iter = hp["init_max_inner_iter"],
                                     max_line_iter = hp["init_max_line_iter"],
                                     calculate_cost = True)
 
+    print("W, H final norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
+
     time_results["refining"] = time.time() - start_time
 
     # Get refined cost
-    refined_nonneg_cost = cost_function(W, H)
+    refined_nonneg_cost = cost_function(np.array(W), np.array(H))
     print("Refined nonnegative cost:", refined_nonneg_cost)
 
     start_time = time.time()
@@ -99,6 +123,7 @@ if __name__ == '__main__':
                                     data["X"], data["Y"], data["Lx"], data["Ly"], data["Omega"],
                                     hp["lamb_reg"],
                                     tol=hp["tol"],
+                                    alt_tol=hp["alt_tol"],
                                     max_outer_iter = hp["max_outer_iter"],
                                     max_inner_iter = hp["max_inner_iter"],
                                     max_line_iter = hp["max_line_iter"],
@@ -131,3 +156,4 @@ if __name__ == '__main__':
     print("Done")
     print(hp)
     print(time_results)
+

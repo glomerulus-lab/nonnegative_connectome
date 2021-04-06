@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Callable
 import math_util
-
+line_count = 0
 
 def alternating_pgd(U, V, 
                     cost_func,
@@ -10,6 +10,7 @@ def alternating_pgd(U, V,
                     indicator_func,
                     projection_func,
                     tol=1e-10,
+                    alt_tol=1e-5,
                     max_outer_iter = 10,
                     max_inner_iter = 10,
                     max_line_iter = 100,
@@ -27,26 +28,6 @@ def alternating_pgd(U, V,
         prev_U = U_k
         prev_V = V_k
 
-        # Prepare functions in terms of U_k
-        cost_U_k = lambda U_k: cost_func(U_k, V_k)
-        grad_U_k = lambda U_k: grad_func_U(U_k, V_k)
-
-        #Perform PGD on U_k
-        U_k = acc_prox_grad_method( U_k, 
-                                    cost_U_k, 
-                                    grad_U_k, 
-                                    indicator_func, 
-                                    projection_func,
-                                    tol=1e-10, 
-                                    max_iter=max_inner_iter, 
-                                    max_line_iter=max_line_iter,
-                                    gamma=0.5)
-
-        if(indicator_func(U_k) > 0):
-            print("Error: indicator function for U true. Exiting...")
-            exit()
-
-
         # Prepare functions in terms of V_k
         cost_V_k = lambda V_k: cost_func(U_k, V_k)
         grad_V_k = lambda V_k: grad_func_V(U_k, V_k)
@@ -57,14 +38,37 @@ def alternating_pgd(U, V,
                                     grad_V_k, 
                                     indicator_func, 
                                     projection_func,
-                                    tol=1e-10, 
+                                    tol=alt_tol, 
                                     max_iter=max_inner_iter, 
                                     max_line_iter=max_line_iter,
-                                    gamma=0.5)
+                                    gamma=0.1)
 
         if(indicator_func(V_k) > 0):
             print("Error: indicator function for V true. Exitting...")
             exit()
+
+
+        # Prepare functions in terms of U_k
+        cost_U_k = lambda U_k: cost_func(U_k, V_k)
+        grad_U_k = lambda U_k: grad_func_U(U_k, V_k)
+
+        #Perform PGD on U_k
+        U_k = acc_prox_grad_method( U_k, 
+                                    cost_U_k, 
+                                    grad_U_k, 
+                                    indicator_func, 
+                                    projection_func,
+                                    tol=alt_tol, 
+                                    max_iter=max_inner_iter, 
+                                    max_line_iter=max_line_iter,
+                                    gamma=0.1)
+
+        if(indicator_func(U_k) > 0):
+            print("Error: indicator function for U true. Exiting...")
+            exit()
+
+
+
         
         
         if(calculate_cost):
@@ -74,13 +78,13 @@ def alternating_pgd(U, V,
             
         fro_norm_sq = np.trace(V_k @ V_k.T @ U_k.T @ U_k)
         if (math_util.factorized_difference_frobenius_sq(U_k, V_k, prev_U, prev_V) / fro_norm_sq < tol**2):
-            break   
+            break
     
     print()
     if(k < max_outer_iter):
         print("Tolerance reached.")
 
-
+    print("Line count:", line_count)
     return U_k, V_k, costs
              
 
@@ -151,7 +155,13 @@ def acc_prox_grad_method(x: np.ndarray,  # noqa: C901
         # store old iterate
         x_old = x
         # Armijo line search
+        
+        #note: for better performance, do not reset step size
+        # s = s0
+        
         for line_iter in range(max_line_iter):
+            global line_count
+            line_count += 1
             # new point via prox-gradient of momentum point
             x = prox(q - s * grad_g1, s)
             # G_s(q) as in the notes linked above
@@ -164,6 +174,7 @@ def acc_prox_grad_method(x: np.ndarray,  # noqa: C901
             else:
                 # Armijo not satisfied
                 s *= gamma  # shrink step size
+                # print("line search iter: ", line_iter)
 
         # update momentum point
         q = x + ((k - 1) / (k + 2)) * (x - x_old)
@@ -186,6 +197,7 @@ def acc_prox_grad_method(x: np.ndarray,  # noqa: C901
                 print(f'\nrelative change in objective function {rel_change:.2g} '
                       f'is within tolerance {tol} after {k} iterations',
                       flush=True)
+                print("@@@@                       line search tolerance reached")
             break
         if k == max_iter:
             if verbose:
