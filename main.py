@@ -117,6 +117,15 @@ if __name__ == '__main__':
     print("Refined nonnegative cost:", refined_nonneg_cost)
 
     start_time = time.time()
+    
+    savedata = {"W":np.empty((2,1), dtype=object)}
+    savedata["W"][0] = [W]
+    savedata["W"][1] = [H.T]
+    for key in hp.keys():
+        savedata["hp_"+key] = hp[key]
+
+    print("Saving refinied initialization")
+    scipy.io.savemat("data/refined_init_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", savedata)
 
     print("Starting nonnegative regression problem")
     U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
