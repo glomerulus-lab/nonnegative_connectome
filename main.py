@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    # Refine nonnegative initialization bith alternating PGD 
+    # Refine nonnegative initialization with alternating PGD 
     print("Refining nonnegative solution")
     W, H, init_costs = nonnegative_initialization.refine_nonnegative_factors(W, H, Y, Z,
                                     tol=hp["init_tol"], 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
     time_results["final_solution"] = time.time() - start_time     
 
-    # Get refined cost
+    # Get final cost
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)
 
