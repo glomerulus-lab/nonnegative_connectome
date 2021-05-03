@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colors import ListedColormap
+from matplotlib import gridspec
 import load_mat
 import palettable # https://jiffyclub.github.io/palettable/
 
@@ -49,7 +50,7 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
             Q1[:, rank] *= Q2_norm
             Q2[:, rank] /= Q2_norm
 
-        indexlist = np.argsort(factor_norms_sq)
+        indexlist = np.argsort(-1*factor_norms_sq)
         
         Q1 = Q1[:, indexlist]
         Q2 = Q2[:, indexlist]
@@ -63,6 +64,8 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
         Q1 = Q1 @ u * S
         Q2 = Q2 @ vh.T
     
+    
+    outputpath = 'plots/plot_test/' #TODO remove this line
 
     if not os.path.exists('plots'):
         os.makedirs('plots')   
@@ -79,7 +82,7 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
         source_img = map_to_grid(Q2[:,i] * sign , voxel_coords_source, view_lut)
 
         filename = outputpath+str(output_name)+'_factor_'+str(i+1)
-        plot_factor(target_img, source_img, filename)
+        plot_factor(target_img, source_img, testname, filename)
 
 
 
@@ -113,23 +116,43 @@ def create_plot_im(ax, img):
     ax.axes.get_xaxis().set_visible(False)
     ax.axes.get_yaxis().set_visible(False)
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes('right', size='20%', pad=0.05)
+    cax = divider.append_axes('right', size=0.25, pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
     return im
 
 #Visualize the source and target for the given factor.
-def plot_factor(target_img, source_img, filename):
+def plot_factor(target_img, source_img, testname, filename):
     print(filename)
+    figsize = (2,1)
+    #fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,4)) 
+    fig = plt.figure()
 
-    fig, (ax1, ax2) = plt.subplots(1,2) 
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
     
+    fig = plt.figure(figsize=(8, 6)) 
+
+    ratios = [1.73, 1]
+    if(testname == 'flatmap'):
+        ratios = [1.8, 1]
+    
+    gs = gridspec.GridSpec(1, 2, width_ratios=ratios) 
+
+    ax1 = plt.subplot(gs[0])
+    ax2 = plt.subplot(gs[1])
+
+
     im1 = create_plot_im(ax1, target_img)
-    im2 = create_plot_im(ax2, source_img)
+    im2 = create_plot_im(ax2, remove_left_of_image(source_img))
     
-    plt.savefig(filename, dpi=400)
+    
+    plt.savefig(filename, dpi=400, bbox_inches='tight')
     plt.clf()
     plt.close()
 
+def remove_left_of_image(img):
+    shape = img.shape
+    return img[:,int(shape[1]/2)-10:]
 
 
 if __name__ == '__main__':
