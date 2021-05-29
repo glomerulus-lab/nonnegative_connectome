@@ -74,7 +74,7 @@ def refine_nonnegative_factors(W, H, Y, Z,
     H = jnp.array(H)
     Y = jnp.array(Y)
     Z = jnp.array(Z)
-
+    print(W.shape, H.shape, Y.shape, Z.shape)
     print("Starting nonnegative factor refinement with PGD")
     W, H, costs = alt_acc_prox_grad.alternating_pgd(
                     W, H, 

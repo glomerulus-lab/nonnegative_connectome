@@ -82,7 +82,7 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
         source_img = map_to_grid(Q2[:,i] * sign , voxel_coords_source, view_lut)
 
         filename = outputpath+str(output_name)+'_factor_'+str(i+1)
-        plot_factor(target_img, source_img, testname, filename)
+        plot_factor(target_img, source_img, testname, filename, np.linalg.norm(Q1[:,i]), i+1)
 
 
 
@@ -108,8 +108,9 @@ def create_plot_im(ax, img):
         im = ax.imshow(img, cmap=ListedColormap(palettable.colorbrewer.diverging.RdBu_11_r.mpl_colors))
         im.set_clim(-colormapLimit,colormapLimit)
     else:
-        # plt.set_cmap('Reds')
-        im = ax.imshow(img, cmap=ListedColormap(palettable.colorbrewer.sequential.Reds_9.mpl_colors))
+        #im = ax.imshow(img, cmap=ListedColormap(palettable.colorbrewer.sequential.Reds_9.mpl_colors))
+        im = ax.imshow(img, cmap="Reds")
+
         im.set_clim(0,colormapLimit)
 
 
@@ -118,10 +119,11 @@ def create_plot_im(ax, img):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes('right', size=0.25, pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
+    cbar.set_ticks([])
     return im
 
 #Visualize the source and target for the given factor.
-def plot_factor(target_img, source_img, testname, filename):
+def plot_factor(target_img, source_img, testname, filename, magnitude, factor):
     print(filename)
     figsize = (2,1)
     #fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,4)) 
@@ -131,10 +133,14 @@ def plot_factor(target_img, source_img, testname, filename):
     ax2 = fig.add_subplot(122)
     
     fig = plt.figure(figsize=(8, 6)) 
-
+    
     ratios = [1.73, 1]
+    title_height = 0.85
+    title_testname = "Top-View"
     if(testname == 'flatmap'):
         ratios = [1.8, 1]
+        title_height = 0.66
+        title_testname = "Flatmap"
     
     gs = gridspec.GridSpec(1, 2, width_ratios=ratios) 
 
@@ -145,7 +151,7 @@ def plot_factor(target_img, source_img, testname, filename):
     im1 = create_plot_im(ax1, target_img)
     im2 = create_plot_im(ax2, remove_left_of_image(source_img))
     
-    
+    plt.figtext(0.52,title_height,title_testname + " Factor " + str(factor) + ", Norm: " + "{:.2f}".format(magnitude), ha='center', va='center', fontsize="20")
     plt.savefig(filename, dpi=400, bbox_inches='tight')
     plt.clf()
     plt.close()
@@ -157,7 +163,6 @@ def remove_left_of_image(img):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-
     U, V = load_mat.load_solution(args.solution_name[0], args.greedy)
     plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.nneg)
     

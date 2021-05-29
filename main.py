@@ -5,6 +5,7 @@ import load_mat
 import nonnegative_initialization
 import nonnegative_connectome
 import time
+import plot_test_heatmap
 
 count = 0
 
@@ -50,6 +51,7 @@ if __name__ == '__main__':
     # Load data for problem setup
     data = load_mat.load_all_matricies(hp["testname"])
 
+    print(data["Lx"].shape)
 
     #Use fixed values for lambda for consistency
     if(hp["testname"]=="top_view"):
@@ -71,7 +73,7 @@ if __name__ == '__main__':
     #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
-
+    # plot_test_heatmap.create_heatmap(Y,Z,"test_plot_greedy")
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
     Y, Z = balance_norms(Y, Z)
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
@@ -87,7 +89,7 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
-
+    # plot_test_heatmap.create_heatmap(W,H,"test_plot_init")
     print("W, H init norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
 
     time_results["initialization"] = time.time() - start_time
@@ -109,7 +111,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     print("W, H final norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
-
+    # plot_test_heatmap.create_heatmap(W,H,"test_plot_ref")
     time_results["refining"] = time.time() - start_time
 
     # Get refined cost
@@ -139,7 +141,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     time_results["final_solution"] = time.time() - start_time     
-
+    # plot_test_heatmap.create_heatmap(U,V,"test_plot_fin")
     # Get final cost
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)

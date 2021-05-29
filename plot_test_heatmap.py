@@ -29,32 +29,33 @@ def create_heatmap(U, V, output_file):
     rank = U.shape[1]
 
     #Plot solution
-    ax = sns.heatmap( X, cmap="Reds", cbar=True)
-    plt.title("$\mathregular{W_{"+str(rank)+"}}$")
+    ax = sns.heatmap( X, cmap="Reds", cbar=True, xticklabels=[], yticklabels=[])
+    ax.tick_params(left=False, bottom=False) ## other options are right and top
 
+    plt.title("$\mathregular{W_{"+str(rank)+"}}$")
     #Save plot as file
-    plt.savefig(output_file)
+    plt.savefig(output_file, bbox_inches='tight')
     plt.clf()
 
 
 def create_heatmap_test_truth(output_file):
     W = load_mat.load_test_truth()
     #Plot solution
-    ax = sns.heatmap( W, cmap="Reds", cbar=True)
+    ax = sns.heatmap( W, cmap="Reds", cbar=True, xticklabels=[], yticklabels=[])
     plt.title("$\mathregular{W_{truth}}$")
     
     #Save plot as file
-    plt.savefig(output_file)
+    plt.savefig(output_file, bbox_inches='tight')
     plt.clf()
     
     
 #Wrapper for create_heatmap that accepts a solution file to load
-def _create_heatmap_from_solution(solution_name, output_file, greedy=True):
+def _create_heatmap_from_solution(solution_name, output_file, greedy=False):
     U, V = load_mat.load_solution(solution_name, greedy)
     create_heatmap(U, V, output_file)
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    _create_heatmap_from_solution(args.solution_name[0], args.output_file[0])
-    # create_heatmap_test_truth(args.output_file[0])
+    # create_heatmap_from_solution(args.solution_name[0], args.output_file[0])
+    create_heatmap_test_truth(args.output_file[0])
