@@ -20,11 +20,13 @@ parser.add_argument('init_max_line_iter',  type=int,help='')
 parser.add_argument('max_outer_iter',  type=int, help='')
 parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
+
 # Flags
 parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/data for solution.')
 parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
 parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
 parser.add_argument('-alt_tol', type=float, default=1e-6, help="tolerance for alt_acc_prox_grad")
+parser.add_argument('-lamb', type=float, default=100, help="lambda")
 
 
 def balance_norms(Y, Z):
@@ -52,14 +54,14 @@ if __name__ == '__main__':
     data = load_mat.load_all_matricies(hp["testname"])
 
     print(data["Lx"].shape)
-
-    #Use fixed values for lambda for consistency
-    if(hp["testname"]=="top_view"):
-        hp["lamb"] = 1e6
-    elif(hp["testname"]=="flatmap"):
-        hp["lamb"] = 3e7
-    else:
-        hp["lamb"] = 100
+    print("lambda value is: ", hp["lamb"])
+    # #Use fixed values for lambda for consistency
+    # if(hp["testname"]=="top_view"):
+    #     hp["lamb"] = 1e6
+    # elif(hp["testname"]=="flatmap"):
+    #     hp["lamb"] = 3e7
+    # else:
+    #     hp["lamb"] = 100
 
     # make regularization parameter dimensionless
     hp["lamb_reg"] = hp["lamb"] * (data["X"].shape[1] / data["Lx"].shape[0])  #(n_inj / n_x)
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
-    # plot_test_heatmap.create_heatmap(Y,Z,"test_plot_greedy")
+    plot_test_heatmap.create_heatmap(Y,Z,"test_plot_greedy")
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
     Y, Z = balance_norms(Y, Z)
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
@@ -89,7 +91,7 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
-    # plot_test_heatmap.create_heatmap(W,H,"test_plot_init")
+    plot_test_heatmap.create_heatmap(W,H,"test_plot_init")
     print("W, H init norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
 
     time_results["initialization"] = time.time() - start_time
@@ -111,7 +113,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     print("W, H final norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
-    # plot_test_heatmap.create_heatmap(W,H,"test_plot_ref")
+    plot_test_heatmap.create_heatmap(W,H,"test_plot_ref")
     time_results["refining"] = time.time() - start_time
 
     # Get refined cost
@@ -141,7 +143,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     time_results["final_solution"] = time.time() - start_time     
-    # plot_test_heatmap.create_heatmap(U,V,"test_plot_fin")
+    plot_test_heatmap.create_heatmap(U,V,"test_plot_fin")
     # Get final cost
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)
@@ -157,6 +159,8 @@ if __name__ == '__main__':
     data["cost_init"] = nonneg_init_cost
     data["cost_refined"] = refined_nonneg_cost
     data["cost_final"] = final_nonneg_cost
+    data["loss_final"] = 
+    data["reg_final"] = 
     for key in hp.keys():
         data["hp_"+key] = hp[key]
     
