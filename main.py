@@ -147,6 +147,11 @@ if __name__ == '__main__':
     # Get final cost
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)
+  
+  
+    final_loss_score = nonnegative_connectome.loss_score(U, V.T, 
+            data["X"], data["Y"], data["Omega"])
+    final_reg_score = nonnegative_connectome.regularization_score(U, V.T, data["Lx"], data["Ly"], hp["lamb_reg"])
 
     # Save data to file
     print("Saving final solution with hyperparameters and experiment results...")
@@ -159,8 +164,9 @@ if __name__ == '__main__':
     data["cost_init"] = nonneg_init_cost
     data["cost_refined"] = refined_nonneg_cost
     data["cost_final"] = final_nonneg_cost
-    data["loss_final"] = 
-    data["reg_final"] = 
+    data["loss_final"] = final_loss_score
+    data["reg_final"] = final_reg_score
+    
     for key in hp.keys():
         data["hp_"+key] = hp[key]
     
