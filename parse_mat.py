@@ -1,14 +1,12 @@
-import argparse
 import scipy.io as sci
 import numpy as np
+import matplotlib.pyplot as plt 
 
-# parser = argparse.ArgumentParser(description="Gets data")
-
-# # Arguments
-# parser.add_argument('filename',  type=str, help='Name of mat file to parse')
 data_list = []
 losses = []
 regs = []
+
+# parse data for each lambda test
 for x in range(0,11):
     if x != 0:
         lamb = "1e"+str(x)
@@ -20,10 +18,9 @@ for x in range(0,11):
     losses.append(data["loss_final"][0][0])
     regs.append(data["reg_final"][0][0])
 
-import matplotlib.pyplot as plt 
-
-# plotting the points  
+# plotting l-curve (reg, loss)
 plt.plot(regs, losses, linestyle="-", marker=".", color='b')
 plt.xlabel("Regularization")
 plt.ylabel("Loss")
 plt.show()
+
