@@ -101,8 +101,14 @@ def regularized_cost(U, V, X, Y, Lx, Ly, lamb, Omega):
     # print("regularized_cost", U.shape, V.shape, X.shape, Y.shape, Lx.shape, Ly.shape, Omega.shape)
     result = np.linalg.norm(P_Omega(U @ (V.T @ X) - Y, Omega), ord='fro')**2
     result = result + lamb * math_util.factorized_sum_frobenius_sq_j_einsum(Ly @ U, V.T, U, V.T @ Lx.T)
-    
     times[0] += time.time() - start_time
 
     return result
 
+def loss_score(U, V, X, Y, Omega):
+    loss = np.linalg.norm(P_Omega(U @ (V.T @ X) - Y, Omega), ord='fro')**2
+    return loss
+
+def regularization_score(U, V, Lx, Ly, lamb):
+    regularization = math_util.factorized_sum_frobenius_sq_j_einsum(Ly @ U, V.T, U, V.T @ Lx.T)
+    return regularization
