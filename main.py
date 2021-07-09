@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser(description="Computes non-negative factors give
 # Arguments
 parser.add_argument('testname',  type=str, help='Name of test to compute nonnegative factors')
 parser.add_argument('solution_name', type=str, help='Name of greedy solution to initialize with,')
+parser.add_argument('data_directory',  type=str, help='Name of directory to save data')
+parser.add_argument('images_directory',  type=str, help='Name of directory to save heatmaps')
 parser.add_argument('output_suffix',  type=str, help='')
 parser.add_argument('init_max_outer_iter',  type=int, help='')
 parser.add_argument('init_max_inner_iter',  type=int, help='')
@@ -75,7 +77,7 @@ if __name__ == '__main__':
     #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"], hp["from_lc"])
-    greedy = plot_test_heatmap.create_heatmap(Y,Z,"lambda_tests/lambda_images/"+hp["output_suffix"]+"_images/"+"test_plot_greedy"+"_"+hp["output_suffix"])
+    greedy = plot_test_heatmap.create_heatmap(Y,Z,hp["images_directory"]+"test_plot_greedy"+"_"+hp["output_suffix"])
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
     Y, Z = balance_norms(Y, Z)
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
@@ -91,7 +93,7 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
-    plot_test_heatmap.create_heatmap(W,H,"lambda_tests/lambda_images/"+hp["output_suffix"]+"_images/"+"test_plot_init"+"_"+hp["output_suffix"])
+    plot_test_heatmap.create_heatmap(W,H,hp["images_directory"]+"test_plot_init"+"_"+hp["output_suffix"])
     print("W, H init norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
 
     time_results["initialization"] = time.time() - start_time
@@ -113,7 +115,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     print("W, H final norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
-    plot_test_heatmap.create_heatmap(W,H,"lambda_tests/lambda_images/"+hp["output_suffix"]+"_images/"+"test_plot_ref"+"_"+hp["output_suffix"])
+    plot_test_heatmap.create_heatmap(W,H,hp["images_directory"]+"test_plot_ref"+"_"+hp["output_suffix"])
     time_results["refining"] = time.time() - start_time
 
     # Get refined cost
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     time_results["final_solution"] = time.time() - start_time     
-    plot_test_heatmap.create_heatmap(U,V,"lambda_tests/lambda_images/"+hp["output_suffix"]+"_images/"+"test_plot_fin"+"_"+hp["output_suffix"])
+    plot_test_heatmap.create_heatmap(U,V,hp["images_directory"]+"test_plot_fin"+"_"+hp["output_suffix"])
     # Get final cost
     final_nonneg_cost = cost_function(U, V)
     print("Final nonnegative cost:", final_nonneg_cost)
@@ -173,7 +175,7 @@ if __name__ == '__main__':
     for key in time_results.keys():
         data["time_"+key] = time_results[key]
 
-    scipy.io.savemat("lambda_tests/lambda_data/nonnegative_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", data)
+    scipy.io.savemat(hp["data_directory"]+hp["testname"]+"_"+hp["output_suffix"]+".mat", data)
     print("Done")
     print(hp)
     print(time_results)
