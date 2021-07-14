@@ -32,10 +32,10 @@ norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), label="Lambda")
 plt.xlabel("Regularization")
 plt.ylabel("Loss")
-plt.show()
+# plt.show()
 
-# # save l-curve
-# plt.savefig("lambda_tests/test-l-curve.svg")
-# plt.savefig("lambda_tests/test-l-curve.jpg")
+# save l-curve
+plt.savefig("lambda_tests/test-l-curve.svg")
+plt.savefig("lambda_tests/test-l-curve.jpg")
 
 
