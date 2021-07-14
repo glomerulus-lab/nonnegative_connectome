@@ -2,6 +2,29 @@ import numpy as np
 import scipy.io
 
 
+# Loads solution factors from .mat file, returns lamb
+def load_lamb(name, greedy=False,):
+    try:
+        filename = "matlab/solution/"+name
+
+        if(greedy):
+            # Load solution from lowrank_connectome repository
+            filename = "../lowrank_connectome/" + filename
+
+        print(filename)
+        data = scipy.io.loadmat(filename)
+
+
+        return data["lamb"][0][0]
+
+    except:
+        # Solution file not found
+        if(greedy):
+            print("Solution from '" + filename + "' could not be found, make sure a solution exists by running test_allvis_completion.m. Exitting.")
+        else:
+            print("Solution from '" + filename + "' could not be found, Exitting.")
+        exit(1)
+
 # Loads solution factors from .mat file, returns U, V
 # Where the full (low rank) solution X = U @ V
 # U has shape (nx * r)
@@ -9,7 +32,7 @@ import scipy.io
 def load_solution(name, greedy=False):
     
     try:
-        filename = "data/"+name
+        filename = "matlab/solution/"+name
 
         if(greedy):
             # Load solution from lowrank_connectome repository
