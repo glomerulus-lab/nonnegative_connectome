@@ -12,7 +12,6 @@ parser.add_argument('output_file',  type=str, nargs=1,
 
 
 def create_heatmap(U, V, output_file):
-
     if not os.path.exists('plots'):
         os.makedirs('plots')   
     if not os.path.exists('plots/test'):
@@ -50,12 +49,12 @@ def create_heatmap_test_truth(output_file):
     
     
 #Wrapper for create_heatmap that accepts a solution file to load
-def _create_heatmap_from_solution(solution_name, output_file, greedy=False):
+def create_heatmap_from_solution(solution_name, output_file, greedy=False):
     U, V = load_mat.load_solution(solution_name, greedy)
     create_heatmap(U, V, output_file)
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # create_heatmap_from_solution(args.solution_name[0], args.output_file[0])
-    create_heatmap_test_truth(args.output_file[0])
+    create_heatmap_from_solution(args.solution_name[0], args.output_file[0])
+    # create_heatmap_test_truth(args.output_file[0])
