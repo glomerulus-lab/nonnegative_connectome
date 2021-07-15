@@ -152,7 +152,7 @@ def plot_factor(target_img, source_img, testname, filename, magnitude, factor):
     im2 = create_plot_im(ax2, remove_left_of_image(source_img))
     
     plt.figtext(0.52,title_height,title_testname + " Factor " + str(factor) + ", Norm: " + "{:.2f}".format(magnitude), ha='center', va='center', fontsize="20")
-    plt.savefig(filename, dpi=400, bbox_inches='tight')
+    plt.savefig(filename.replace(".","_"), dpi=400, bbox_inches='tight')
     plt.clf()
     plt.close()
 
