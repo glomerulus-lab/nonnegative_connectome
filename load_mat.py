@@ -5,11 +5,11 @@ import scipy.io
 # Loads solution factors from .mat file, returns lamb
 def load_lamb(name, greedy=False,):
     try:
-        filename = "matlab/solution/"+name
+        filename = name
 
         if(greedy):
             # Load solution from lowrank_connectome repository
-            filename = "../lowrank_connectome/" + filename
+            filename = "../lowrank_connectome/matlab/solution/" + filename
 
         print(filename)
         data = scipy.io.loadmat(filename)
@@ -32,11 +32,11 @@ def load_lamb(name, greedy=False,):
 def load_solution(name, greedy=False):
     
     try:
-        filename = "matlab/solution/"+name
+        filename = name
 
         if(greedy):
             # Load solution from lowrank_connectome repository
-            filename = "../lowrank_connectome/" + filename
+            filename = "../lowrank_connectome/matlab/solution/" + filename
 
         print(filename)
         data = scipy.io.loadmat(filename)
