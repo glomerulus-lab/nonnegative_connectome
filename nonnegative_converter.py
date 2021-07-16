@@ -2,10 +2,10 @@ import argparse
 import scipy.io
 import numpy as np
 import load_mat
-import nonnegative_initialization
-import nonnegative_connectome
+import nonnegative.nonnegative_initialization as nonnegative_initialization
+import nonnegative.nonnegative_connectome as nonnegative_connectome
 import time
-import plot_test_heatmap
+import plot.plot_test_heatmap as plot_test_heatmap
 
 count = 0
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         savedata["hp_"+key] = hp[key]
 
     print("Saving refinied initialization")
-    scipy.io.savemat("data/refined_init_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", savedata)
+    scipy.io.savemat("data/refined/refined_init_"+hp["testname"]+"_"+hp["output_suffix"]+".mat", savedata)
 
     print("Starting nonnegative regression problem")
     U, V, costs = nonnegative_connectome.optimize_alt_pgd(W, H, 
