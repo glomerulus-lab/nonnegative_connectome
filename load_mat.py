@@ -3,14 +3,9 @@ import scipy.io
 
 
 # Loads solution factors from .mat file, returns lamb
-def load_lamb(name, greedy=False,):
+def load_lamb(name, folder, greedy=False,):
     try:
-        filename = name
-
-        if(greedy):
-            # Load solution from lowrank_connectome repository
-            filename = "../lowrank_connectome/matlab/solution/" + filename
-
+        filename = folder+name
         print(filename)
         data = scipy.io.loadmat(filename)
 
@@ -29,15 +24,10 @@ def load_lamb(name, greedy=False,):
 # Where the full (low rank) solution X = U @ V
 # U has shape (nx * r)
 # V has shape (r * ny)
-def load_solution(name, greedy=False):
+def load_solution(name, folder, greedy=False):
     
     try:
-        filename = name
-
-        if(greedy):
-            # Load solution from lowrank_connectome repository
-            filename = "../lowrank_connectome/matlab/solution/" + filename
-
+        filename = folder+ name
         print(filename)
         data = scipy.io.loadmat(filename)
 
@@ -68,7 +58,7 @@ def load_test_truth():
 def load_voxel_coords(testname):
 
     try:
-        data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
+        data = scipy.io.loadmat("../../lowrank_connectome/data/"+testname+"_matrices.mat")
 
         voxel_coords_source = data["voxel_coords_source"]
         voxel_coords_target = data["voxel_coords_target"]
@@ -76,16 +66,16 @@ def load_voxel_coords(testname):
 
         return  voxel_coords_source, voxel_coords_target, view_lut
     except:
-        print("'Voxel coordinates from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
+        print("'Voxel coordinates from '../../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
 
 def load_all_matricies(testname):
     try:
-        data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
+        data = scipy.io.loadmat("../../lowrank_connectome/data/"+testname+"_matrices.mat")
         data["Omega"] = data["Omega"].astype(np.int8)
         data["Lx"] = data["Lx"].astype(np.int8)
         data["Ly"] = data["Ly"].astype(np.int8)
         return  data
     except:
-        print("'Matricies data from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
+        print("'Matricies data from '../../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
