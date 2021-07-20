@@ -28,8 +28,8 @@ parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_con
 parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
 parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
 parser.add_argument('-alt_tol', type=float, default=1e-6, help="tolerance for alt_acc_prox_grad")
-parser.add_argument('-lamb', type=float, default=100, help="lambda")
-parser.add_argument('--load_lamb', action='store_true', help="Searcg ../lowrank_connectome/matlab/solution for lambda")
+parser.add_argument('-lamb', type=float, default=100, help="value of lambda")
+parser.add_argument('--load_lamb', action='store_true', help="Search ../lowrank_connectome/matlab/solution for lambda")
 
 
 def balance_norms(Y, Z):
