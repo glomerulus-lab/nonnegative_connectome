@@ -21,18 +21,20 @@ example invocation:
 https://github.com/harrispopgen/mushi
 
 
-## main.py 
+## nonnegative_converter.py 
 Computes nonnegative connectome solution using greedy solution.
 
 Arguments:
 - testname: 'test', 'top_view', or 'flatmap' 
 - solution_name: filename of unconstrained solution
+- data_directory: path to folder where output data is stored
+- images_directory: path to folder where output images are stored (test heatmaps)
 - output_suffix: String added to the output solution's filename
 - init_max_outer_iter: Number of alternating iterations in initialization refinement
 - init_max_inner_iter: Number of updates on each factor before alternating in initialization refinement
 - init_max_line_iter: Maximum number of line-search iterations in initialization refinement
 - max_outer_iter: Number of alternating iterations
-- max_inner_iter: umber of updates on each factor before alternating
+- max_inner_iter: Number of updates on each factor before alternating
 - max_line_iter: Maximum number of line-search iterations
 
 Flags:
@@ -40,10 +42,13 @@ Flags:
 - tol: PGD stopping criteria tolerance
 - init_tol: PGD stopping criteria tolerance for initialization refinement
 - alt_tol: tolerance for alt_acc_prox_grad
+- lamb: value of lambda
+- -load_lamb: load lambda value from unconstrained solution in ../lowrank_connectome/matlab/solution
 
 example invocation:
 ```
-python3 main.py top_view top_view_solution 100 50 100 100 50 100 -from_lc
+python3 nonnegative_converter.py top_view top_view_solution data/ images/ nonneg_top_view 400 14 50 400 14 50 -init_tol 1e-6 -tol 1e-7 --load_lamb -from_lc
+
 ```
 
 ## nonnegative_connectome
