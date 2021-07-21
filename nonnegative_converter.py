@@ -1,7 +1,7 @@
 import argparse
 import scipy.io
 import numpy as np
-import load_mat
+import util.load_mat as load_mat
 import nonnegative.nonnegative_initialization as nonnegative_initialization
 import nonnegative.nonnegative_connectome as nonnegative_connectome
 import time

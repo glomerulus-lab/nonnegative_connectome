@@ -2,7 +2,11 @@ import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns # for heatmap generation
 import os
-import load_mat
+import sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+import util.load_mat as load_mat
 
 parser = argparse.ArgumentParser(description="Creates a heatmap of solution.")
 parser.add_argument('solution_name',  type=str, nargs=1,
@@ -50,7 +54,7 @@ def create_heatmap_test_truth(output_file):
     
 #Wrapper for create_heatmap that accepts a solution file to load
 def create_heatmap_from_solution(solution_name, output_file, greedy=False):
-    U, V = load_mat.load_solution(solution_name, greedy)
+    U, V = load_mat.load_solution(solution_name, '../../lowrank_connectome/matlab/solution/',greedy)
     create_heatmap(U, V, output_file)
 
 

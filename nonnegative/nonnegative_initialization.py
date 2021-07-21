@@ -1,6 +1,9 @@
 import numpy as np
-import alt_acc_prox_grad
-import math_util
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import optimization.alt_acc_prox_grad as alt_acc_prox_grad
+import util.math_util as math_util
 from jax import jit
 import jax.numpy as jnp
 # from jax.config import config
