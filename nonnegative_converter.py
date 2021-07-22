@@ -78,7 +78,7 @@ if __name__ == '__main__':
     #Load greedy solution to initialize a nonnegative solution
     print("Loading greedy solution")
     Y, Z = load_mat.load_solution(hp["solution_name"],"../lowrank_connectome/matlab/solution/", hp["from_lc"])
-    if hp["testname"].equals("test"):
+    if hp["testname"]=="test":
         plot_test_heatmap.create_heatmap(Y,Z,hp["images_directory"]+"test_plot_greedy")
     # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
     Y, Z = balance_norms(Y, Z)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     print("Initializing nonnegative solution")        
     W, H = nonnegative_initialization.init_nonnegative_factors(Y, Z)
-    if hp["testname"].equals("test"):
+    if hp["testname"]=="test":
         plot_test_heatmap.create_heatmap(W,H,hp["images_directory"]+"test_plot_init")
     print("W, H init norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     print("W, H final norms", np.linalg.norm(W, ord='fro'),np.linalg.norm(H, ord='fro'))
-    if hp["testname"].equals("test"):
+    if hp["testname"]=="test":
         plot_test_heatmap.create_heatmap(W,H,hp["images_directory"]+"test_plot_ref")
     time_results["refining"] = time.time() - start_time
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
                                     calculate_cost = True)
 
     time_results["final_solution"] = time.time() - start_time     
-    if hp["testname"].equals("test"):
+    if hp["testname"]=="test":
         plot_test_heatmap.create_heatmap(U,V,hp["images_directory"]+"test_plot_fin")
     # Get final cost
     final_nonneg_cost = cost_function(U, V)
