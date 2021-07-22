@@ -58,7 +58,7 @@ def load_test_truth():
 def load_voxel_coords(testname):
 
     try:
-        data = scipy.io.loadmat("../../lowrank_connectome/data/"+testname+"_matrices.mat")
+        data = scipy.io.loadmat("../lowrank_connectome/data/"+testname+"_matrices.mat")
 
         voxel_coords_source = data["voxel_coords_source"]
         voxel_coords_target = data["voxel_coords_target"]
@@ -66,7 +66,7 @@ def load_voxel_coords(testname):
 
         return  voxel_coords_source, voxel_coords_target, view_lut
     except:
-        print("'Voxel coordinates from '../../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
+        print("'Voxel coordinates from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
 
 def load_all_matricies(testname):
@@ -77,5 +77,5 @@ def load_all_matricies(testname):
         data["Ly"] = data["Ly"].astype(np.int8)
         return  data
     except:
-        print("'Matricies data from '../../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
+        print("'Matricies data from '../lowrank_connectome/data/"+testname+"_matrices.mat' could not be found, Exitting.")
         exit(1)
