@@ -167,6 +167,6 @@ def remove_left_of_image(img):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    U, V = load_mat.load_solution(args.solution_name[0],'../data/lambda_tv/lambda_data/', args.greedy)
+    U, V = load_mat.load_solution(args.solution_name[0],'../../lowrank_connectome/matlab/', args.greedy)
     plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.nneg)
     
