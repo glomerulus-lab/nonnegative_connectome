@@ -26,6 +26,11 @@ def load_W_matrices(filepath):
 
     return W_true, W
 
+def calc_error(W_true, W):
+    W = np.dot(W[0][0],W[1][0].T)
+    D = W_true - W
+    error = np.linalg.norm(D, ord='fro')
+    return error
 
 if __name__ == '__main__':
     args = parser.parse_args()
