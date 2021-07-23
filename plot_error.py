@@ -26,6 +26,35 @@ def load_W_matrices(filepath):
 
     return W_true, W
 
+def plot_nneg_error(names,path):
+    lambs = []
+    errors = []
+    for filepath in glob.glob(path+names):
+        print(filepath)
+        filename = os.path.split(filepath)[1]
+        lamb = load_mat.load_lamb(filename, path, greedy=False)
+        lambs.append(lamb)
+        W_true, W = load_W_matrices(filepath)
+        error = calc_error(W_true, W)
+        errors.append(error)
+    # Order values by lambda
+    lambdas = {}
+    for x in range(len(lambs)):
+        lambs[x] = math.log10(lambs[x])
+        lambdas[lambs[x]]= [errors[x]]    
+    lambdas = collections.OrderedDict(sorted(lambdas.items()))
+    lambs.sort()
+    for x in range(len(lambs)):
+        errors[x] = lambdas[lambs[x]]
+    #lamb as log10
+    
+
+def plot_greedy_error(path,names):
+    for filepath in glob.glob(path+names):
+        filename = os.path.split(filepath)[0]
+        lamb = load_mat.load_lambda(filename, path, greedy=True)
+        W_true, W = load_W_matrices(filepath)
+
 def calc_error(W_true, W):
     W = np.dot(W[0][0],W[1][0].T)
     D = W_true - W
@@ -37,8 +66,10 @@ if __name__ == '__main__':
     if(args.nneg):
         print('begin nonnegative solution')
         print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
+        plot_nneg_error(args.solution_name[0], args.path_to_solution[0])
     else:
         print('begin greedy solution')
+        plot_greedy_error(args.solution_name[0], args.path_to_solution[0])
     # path = '/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/lambda_data/'
     # extension = 'test_lambda*.mat'
 
