@@ -27,6 +27,7 @@ parser.add_argument('n',                type=str, nargs=1, help='number of facto
 parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
 parser.add_argument('-nneg',    action='store_true', help='Plot reordered & scaled solution, rather than scaled QR decomposition.')
 
+# Map voxel coordinates to show connection patterns
 # Input: 
     # U: shape (nx * r)
     # V: shape (r * ny)
