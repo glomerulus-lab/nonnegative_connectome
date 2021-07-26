@@ -9,21 +9,23 @@ import copy
 
 
 
-
+## Parse solution(s) and save loss, regularization, cost, and lambda values in lists
+    # Input:
+        # filename: name of file to parse (includes full path) (str)
+        # greedy: is greedy solution (bool)
+    # Output: lists for each value
 def parse(filename,greedy=True):
     # parse data for each lambda test
     losses = []
     regs = []
     costs = []
     lambs = []
-    print(filename)
     for filepath in glob.glob(filename):
-        print(filepath)
         if(greedy):
             list_variables= ["cost","loss","reg","lamb"]
         else:
             list_variables= ["cost_final", "loss_final", "reg_final", "hp_lamb"]
-        list_variables[0]
+        
         data = sci.loadmat(filepath, variable_names=list_variables[0])
         costs.append(data[list_variables[0]][0][0])
         data = sci.loadmat(filepath, variable_names=list_variables[1])

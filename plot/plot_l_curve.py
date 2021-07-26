@@ -24,19 +24,25 @@ parser.add_argument('title',                 type=str, nargs=1, help='Title of l
 # Flags
 parser.add_argument('-nneg', action='store_true', help='Determines key used to get lambda value. When nonnegative solution used: nneg=True.')
 
+
+## Plot the reg, loss l-curve for specified solutions
+    # Input:
+        # path: path to solution (str)
+        # name: filename of solution (str)
+        # title: figure title (str)
+        # greedy: is greedy soltion (bool)
 def create_l_curve(path, name, title, greedy):
+    # get data and sort it
     losses, regs, costs, lambs = parse(path+name, greedy)
     lambs_copy = copy.deepcopy(lambs)
     lambs_copy, regs = sort_vals(lambs_copy,regs)
     lambs, losses = sort_vals(lambs,losses)
-
+    # save lambda as log10 value
     for x in range(len(lambs)):
         if(greedy):
             lambs[x]=math.log10(lambs[x])
     
     plt = plot(regs, losses, "Regularization", "Loss", title.replace("_", " "), lambs, r'$\lambda$')
-    # plt.show()
-
     # save l-curve
     plt.savefig(path+"../"+title.lower()+".svg")
     plt.savefig(path+"../"+title.lower()+".jpg")
@@ -51,10 +57,5 @@ if __name__ == '__main__':
     else:
         print('begin greedy l-curve')
         create_l_curve(args.path_to_solution[0], args.solution_name[0], args.title[0], True)
-        
-    # '/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/lambda_data/test*.mat'
-    # '/home/stillwj3/Documents/research/lowrank_connectome/matlab/lambda_fm_final.mat'
-    # '/home/stillwj3/Documents/research/lowrank_connectome/matlab/solution/
-    # 'lambda_test*.mat'
-    # 'lambda_tv*.mat'
+
 

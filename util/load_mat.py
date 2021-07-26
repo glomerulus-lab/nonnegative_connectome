@@ -4,13 +4,14 @@ import scipy.io
 
 # Loads solution factors from .mat file, returns lamb
 def load_lamb(name, folder, greedy=False,):
+    filename =''
     try:
         filename = folder+name
         print(filename)
-        data = scipy.io.loadmat(filename)
+        data = scipy.io.loadmat(filename, variable_names ='lamb')
+        lamb = data['lamb'][0][0]
 
-
-        return data["lamb"][0][0]
+        return lamb
 
     except:
         # Solution file not found

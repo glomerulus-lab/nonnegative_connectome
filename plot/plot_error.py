@@ -27,8 +27,8 @@ parser.add_argument('path_to_solution',    type=str, nargs=1, help='Path to .mat
 parser.add_argument('-nneg', action='store_true', help='Determines key used to get lambda value. When nonnegative solution used: nneg=True.')
 
 ## Given a filepath retrieve estimated W and true W
-    # Input: filepath = path+file
-    # Output: W, W_true
+    # Input: filepath = path+file (str)
+    # Output: W, W_true (matrices)
 def load_w_matrices(filepath):
     file_true = '/home/stillwj3/Documents/research/lowrank_connectome/data/test_solution'
     data = sci.loadmat(file_true, variable_names='W_true')
@@ -43,8 +43,8 @@ def get_key_val(filepath, var):
 
 ## Plot the error between true and estimated for nonnegative solutions
     # Input: names: 
-        # name pointing to solution(s), Ex. test*.mat 
-        # path: a string directory path, Ex. path/to/solution/
+        # name pointing to solution(s), Ex. test*.mat (str)
+        # path: a string directory path, Ex. path/to/solution/ (str)
     # Output: An error curve
 def plot_nneg_error(names,path):
     lambs = []
@@ -68,8 +68,8 @@ def plot_nneg_error(names,path):
 
 ## Plot the error between true and estimated for greedy solutions    
     # Input:
-        # names: name pointing to solution(s), Ex. test*.mat
-        # path: a string directory path, Ex. path/to/solution/
+        # names: name pointing to solution(s), Ex. test*.mat (str)
+        # path: a string directory path, Ex. path/to/solution/ (str)
     # Output: An error curve
 def plot_greedy_error(names,path):
     lambs = []
