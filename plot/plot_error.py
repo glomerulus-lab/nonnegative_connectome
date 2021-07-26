@@ -29,42 +29,51 @@ parser.add_argument('-nneg', action='store_true', help='Determines key used to g
 
 def load_w_matrices(filepath):
     file_true = '/home/stillwj3/Documents/research/lowrank_connectome/data/test_solution'
-    data = sci.loadmat(filepath, variable_names='W_true')
+    data = sci.loadmat(file_true, variable_names='W_true')
     W_true = data['W_true']
+    print("load_matrices: ",filepath)
     data = sci.loadmat(filepath, variable_names='W')
     W = data['W']
 
     return W_true, W
+def get_key_val(filepath, var):
+    data = sci.loadmat(filepath, variable_names=var)
+    val = data[var]
 
 def plot_nneg_error(names,path):
     lambs = []
     errors = []
+    
     for filepath in glob.glob(path+names):
-        # print(filepath)
+        #print(filepath)
         filename = os.path.split(filepath)[1]
-        lamb = load_mat.load_lamb(filename, path, greedy=False)
+        data = sci.loadmat(filepath, variable_names='hp_lamb')
+        lamb = data['hp_lamb'][0][0]
         lambs.append(lamb)
         W_true, W = load_w_matrices(filepath)
         error = calc_error(W_true, W)
         errors.append(error)
-
+    print(lambs)
     # Order values by lambda
     lambs, errors = sort_vals(lambs, errors)
 
     # Plot lambda, error
-    plt = plot_l(lambs, errors, r'$\lambda$',"Error","Nonnegative Error", lambs, r'$\lambda$')
+    plt = plot(lambs, errors, r'$\lambda$',"Error","Nonnegative Error", lambs, r'$\lambda$')
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.svg")
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.jpg")
 
     
-
+# Input:
+    # names:
+    # path: a string directory path Ex. path/to/solution/
 def plot_greedy_error(names,path):
     lambs = []
     errors = []
     for filepath in glob.glob(path+names):
         # print(filepath)
         filename = os.path.split(filepath)[1]
-        lamb = load_mat.load_lamb(filename, path, greedy=True)
+        lamb = sci.loadmat(filepath, variable_names='lamb')
+        lamb = data['lamb'][0][0]
         lambs.append(lamb)
         W_true, W = load_w_matrices(filepath)
         error = calc_error(W_true, W)
@@ -74,7 +83,7 @@ def plot_greedy_error(names,path):
     lambs, errors = sort_vals(lambs, errors)
  
     # Plot lambda, error
-    plt = plot_l(lambs, errors, r'$\lambda$',"Error","Greedy Error", lambs, r'$\lambda$')
+    plt = plot(lambs, errors, r'$\lambda$',"Error","Greedy Error", lambs, r'$\lambda$')
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.svg")
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.jpg")
 
