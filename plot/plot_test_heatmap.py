@@ -14,7 +14,7 @@ parser.add_argument('solution_name',  type=str, nargs=1,
 parser.add_argument('output_file',  type=str, nargs=1,
                    help='name of file to save to')
 
-
+# create a heatmap for specified solution using U & V
 def create_heatmap(U, V, output_file):
     if not os.path.exists('plots'):
         os.makedirs('plots')   
@@ -40,7 +40,7 @@ def create_heatmap(U, V, output_file):
     plt.savefig(output_file, bbox_inches='tight')
     plt.clf()
 
-
+# Create heatmap for true test solution
 def create_heatmap_test_truth(output_file):
     W = load_mat.load_test_truth()
     #Plot solution
