@@ -26,12 +26,13 @@ parser.add_argument('path_to_solution',    type=str, nargs=1, help='Path to .mat
 # Flags
 parser.add_argument('-nneg', action='store_true', help='Determines key used to get lambda value. When nonnegative solution used: nneg=True.')
 
-
+## Given a filepath retrieve estimated W and true W
+    # Input: filepath = path+file
+    # Output: W, W_true
 def load_w_matrices(filepath):
     file_true = '/home/stillwj3/Documents/research/lowrank_connectome/data/test_solution'
     data = sci.loadmat(file_true, variable_names='W_true')
     W_true = data['W_true']
-    print("load_matrices: ",filepath)
     data = sci.loadmat(filepath, variable_names='W')
     W = data['W']
 
@@ -40,20 +41,23 @@ def get_key_val(filepath, var):
     data = sci.loadmat(filepath, variable_names=var)
     val = data[var]
 
+## Plot the error between true and estimated for nonnegative solutions
+    # Input: names: 
+        # name pointing to solution(s), Ex. test*.mat 
+        # path: a string directory path, Ex. path/to/solution/
+    # Output: An error curve
 def plot_nneg_error(names,path):
     lambs = []
     errors = []
     
     for filepath in glob.glob(path+names):
-        #print(filepath)
-        filename = os.path.split(filepath)[1]
         data = sci.loadmat(filepath, variable_names='hp_lamb')
         lamb = data['hp_lamb'][0][0]
         lambs.append(lamb)
         W_true, W = load_w_matrices(filepath)
         error = calc_error(W_true, W)
         errors.append(error)
-    print(lambs)
+
     # Order values by lambda
     lambs, errors = sort_vals(lambs, errors)
 
@@ -62,16 +66,15 @@ def plot_nneg_error(names,path):
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.svg")
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.jpg")
 
-    
-# Input:
-    # names:
-    # path: a string directory path Ex. path/to/solution/
+## Plot the error between true and estimated for greedy solutions    
+    # Input:
+        # names: name pointing to solution(s), Ex. test*.mat
+        # path: a string directory path, Ex. path/to/solution/
+    # Output: An error curve
 def plot_greedy_error(names,path):
     lambs = []
     errors = []
     for filepath in glob.glob(path+names):
-        # print(filepath)
-        filename = os.path.split(filepath)[1]
         lamb = sci.loadmat(filepath, variable_names='lamb')
         lamb = data['lamb'][0][0]
         lambs.append(lamb)
@@ -87,7 +90,7 @@ def plot_greedy_error(names,path):
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.svg")
     plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.jpg")
 
-
+## Calculate error between W_true and W using frobenius norm
 def calc_error(W_true, W):
     W = np.dot(W[0][0],W[1][0].T)
     D = W_true - W
@@ -105,10 +108,3 @@ if __name__ == '__main__':
         print('begin greedy solution')
         print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
         plot_greedy_error(args.solution_name[0], args.path_to_solution[0])
-
-    
-    # path = '/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/lambda_data/'
-    # extension = 'test_lambda*.mat'
-
-    # path = '/home/stillwj3/Documents/research/lowrank_connectome/matlab/solution/'
-    # extension = 'lambda_test*.mat'
