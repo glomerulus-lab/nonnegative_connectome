@@ -17,7 +17,7 @@ import jax.numpy as jnp
 # Y shape (nx * p)
 # Z shape (p * ny)
 
-# Returns W, H such the X = W @ Z
+# Returns W, H such that X = W @ Z
 # W shape (nx * (2p-1))
 # H shape ((2p-1) * ny)
 def init_nonnegative_factors(Y, Z):
