@@ -38,12 +38,6 @@ def create_l_curve(testname, path, name, title, greedy):
     lambs_copy = copy.deepcopy(lambs)
     lambs_copy, regs = sort_vals(lambs_copy,regs)
     lambs, losses = sort_vals(lambs,losses)
-    # save lambda as log10 value
-    for x in range(len(lambs)):
-        if(greedy and (not testname == 'flatmap')):
-            print(lambs)
-            lambs[x]=math.log10(lambs[x])
-            print(lambs)
     
     plt = plot(regs, losses, "Regularization", "Loss", title.replace("_", " "), lambs, r'$\lambda$')
     # save l-curve
@@ -54,8 +48,9 @@ def create_l_curve(testname, path, name, title, greedy):
     elif(testname == 'flatmap'):
         path = "../data/lambda_fm/"
 
-    plt.savefig(path+title.lower()+".svg")
     plt.savefig(path+title.lower()+".jpg")
+    plt.savefig(path+title.lower()+".svg")
+    
 
 if __name__ == '__main__':
 
