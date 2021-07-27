@@ -28,6 +28,7 @@ parser.add_argument('-nneg', action='store_true', help='Determines key used to g
 
 ## Plot the reg, loss l-curve for specified solutions
     # Input:
+        # testname: 'test', 'top_view' or 'flatmap' (str)
         # path: path to solution (str)
         # name: filename of solution (str)
         # title: figure title (str)
@@ -50,7 +51,7 @@ def create_l_curve(testname, path, name, title, greedy):
 
     plt.savefig(path+title.lower()+".jpg")
     plt.savefig(path+title.lower()+".svg")
-    
+    return plt
 
 if __name__ == '__main__':
 
