@@ -63,8 +63,8 @@ def plot_nneg_error(names,path):
 
     # Plot lambda, error
     plt = plot(lambs, errors, r'$\lambda$',"Error","Nonnegative Error", lambs, r'$\lambda$')
-    plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.svg")
-    plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_nneg_err.jpg")
+    plt.savefig("../data/lambda_tests/test_nneg_err.svg")
+    plt.savefig("../data/lambda_tests/test_nneg_err.jpg")
 
 ## Plot the error between true and estimated for greedy solutions    
     # Input:
@@ -87,8 +87,8 @@ def plot_greedy_error(names,path):
  
     # Plot lambda, error
     plt = plot(lambs, errors, r'$\lambda$',"Error","Greedy Error", lambs, r'$\lambda$')
-    plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.svg")
-    plt.savefig("/home/stillwj3/Documents/research/nonnegative_connectome/data/lambda_tests/test_greedy_err.jpg")
+    plt.savefig("../data/lambda_tests/test_greedy_err.svg")
+    plt.savefig("../data/lambda_tests/test_greedy_err.jpg")
 
 ## Calculate error between W_true and W using frobenius norm
 def calc_error(W_true, W):
