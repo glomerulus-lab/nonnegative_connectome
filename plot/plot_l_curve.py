@@ -18,6 +18,7 @@ from util.sort import sort_vals
 
 parser = argparse.ArgumentParser(description='Plot dominant factors of connectome solution')
 # Arguments
+parser.add_argument('testname',              type=str, nargs=1, help='Name of test to plot. "test", "top_view" or "flatmap".')
 parser.add_argument('solution_name',         type=str, nargs=1, help='Name of .mat solution file, including or excluding file extension.')
 parser.add_argument('path_to_solution',      type=str, nargs=1, help='Path to .mat solution file, excluding filename.')
 parser.add_argument('title',                 type=str, nargs=1, help='Title of l-curve.')
@@ -31,7 +32,7 @@ parser.add_argument('-nneg', action='store_true', help='Determines key used to g
         # name: filename of solution (str)
         # title: figure title (str)
         # greedy: is greedy soltion (bool)
-def create_l_curve(path, name, title, greedy):
+def create_l_curve(testname, path, name, title, greedy):
     # get data and sort it
     losses, regs, costs, lambs = parse(path+name, greedy)
     lambs_copy = copy.deepcopy(lambs)
@@ -39,13 +40,22 @@ def create_l_curve(path, name, title, greedy):
     lambs, losses = sort_vals(lambs,losses)
     # save lambda as log10 value
     for x in range(len(lambs)):
-        if(greedy):
+        if(greedy and (not testname == 'flatmap')):
+            print(lambs)
             lambs[x]=math.log10(lambs[x])
+            print(lambs)
     
     plt = plot(regs, losses, "Regularization", "Loss", title.replace("_", " "), lambs, r'$\lambda$')
     # save l-curve
-    plt.savefig(path+"../"+title.lower()+".svg")
-    plt.savefig(path+"../"+title.lower()+".jpg")
+    if(testname == 'test'):
+        path = "../data/lambda_tests/"
+    elif(testname == 'top_view'):
+        path = "../data/lambda_tv/"
+    elif(testname == 'flatmap'):
+        path = "../data/lambda_fm/"
+
+    plt.savefig(path+title.lower()+".svg")
+    plt.savefig(path+title.lower()+".jpg")
 
 if __name__ == '__main__':
 
@@ -53,9 +63,9 @@ if __name__ == '__main__':
     print('solution_name: ', args.solution_name[0], '\npath_to_solution: ', args.path_to_solution[0], '\ntitle: ', args.title[0])
     if(args.nneg):
         print('begin nonnegative l-curve')
-        create_l_curve(args.path_to_solution[0], args.solution_name[0], args.title[0], False)
+        create_l_curve(args.testname[0], args.path_to_solution[0], args.solution_name[0], args.title[0], False)
     else:
         print('begin greedy l-curve')
-        create_l_curve(args.path_to_solution[0], args.solution_name[0], args.title[0], True)
+        create_l_curve(args.testname[0], args.path_to_solution[0], args.solution_name[0], args.title[0], True)
 
 
