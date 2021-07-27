@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(description='Plot dominant factors of connectom
 # Arguments
 parser.add_argument('testname',         type=str, nargs=1, help='Name of test to plot. "flatmap" or "top_view"')
 parser.add_argument('solution_name',    type=str, nargs=1, help='Name of .mat solution file, including or excluding file extension.')
-parser.add_argument('path_to_solution', type=str, nargs=1, help='Dir path where solution is located'
+parser.add_argument('path_to_solution', type=str, nargs=1, help='Dir path where solution is located')
 parser.add_argument('n',                type=str, nargs=1, help='number of factors to plot')
 # Flags
 parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
@@ -176,6 +176,6 @@ def remove_left_of_image(img):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    U, V = load_mat.load_solution(args.solution_name[0],path_to_solution[0], args.greedy)
+    U, V = load_mat.load_solution(args.solution_name[0],args.path_to_solution[0], args.greedy)
     plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.nneg)
     
