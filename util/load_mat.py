@@ -29,8 +29,7 @@ def load_solution(name, folder, greedy=False):
     
     try:
         filename = folder+ name
-        print(filename)
-        data = scipy.io.loadmat(filename)
+        data = scipy.io.loadmat(filename, variable_names="W")
 
 
         return data["W"][0][0], np.transpose(data["W"][1][0])
