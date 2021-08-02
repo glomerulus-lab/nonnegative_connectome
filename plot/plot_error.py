@@ -30,13 +30,14 @@ parser.add_argument('-nneg', action='store_true', help='Determines key used to g
     # Input: filepath = path+file (str)
     # Output: W, W_true (matrices)
 def load_w_matrices(filepath):
-    file_true = '/home/stillwj3/Documents/research/lowrank_connectome/data/test_solution'
+    file_true = '../../lowrank_connectome/data/test_solution'
     data = sci.loadmat(file_true, variable_names='W_true')
     W_true = data['W_true']
     data = sci.loadmat(filepath, variable_names='W')
     W = data['W']
 
     return W_true, W
+
 def get_key_val(filepath, var):
     data = sci.loadmat(filepath, variable_names=var)
     val = data[var]
@@ -75,7 +76,7 @@ def plot_greedy_error(names,path):
     lambs = []
     errors = []
     for filepath in glob.glob(path+names):
-        lamb = sci.loadmat(filepath, variable_names='lamb')
+        data = sci.loadmat(filepath, variable_names='lamb')
         lamb = data['lamb'][0][0]
         lambs.append(lamb)
         W_true, W = load_w_matrices(filepath)
@@ -99,12 +100,20 @@ def calc_error(W_true, W):
 
 
 if __name__ == '__main__':
-    args = parser.parse_args()
-    if(args.nneg):
-        print('begin nonnegative solution')
-        print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
-        plot_nneg_error(args.solution_name[0], args.path_to_solution[0])
-    else:
-        print('begin greedy solution')
-        print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
-        plot_greedy_error(args.solution_name[0], args.path_to_solution[0])
+    # args = parser.parse_args()
+    # if(args.nneg):
+    #     print('begin nonnegative solution')
+    #     print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
+    #     plot_nneg_error(args.solution_name[0], args.path_to_solution[0])
+    # else:
+    #     print('begin greedy solution')
+    #     print('solution_name: ', args.solution_name[0], ', path_to_solution: ', args.path_to_solution[0])
+    #     plot_greedy_error(args.solution_name[0], args.path_to_solution[0])
+
+    # path = '../../lowrank_connectome/matlab/solution/'
+    # files = 'lambda_tv*.mat'
+    # plot_greedy_error(files, path)
+
+    path = '../../lowrank_connectome/matlab/solution/'
+    files = 'lambda_fm*.mat'
+    plot_greedy_error(files, path)
