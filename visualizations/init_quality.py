@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import scipy.io
 import numpy as np
-
+import argparse
 
 
 
@@ -63,6 +63,7 @@ if __name__ == '__main__':
     
     Note: See tv_quality.py for an example of the data used for this figure.
     '''
+    args = parser.parse_args()
     dir = args.directory_path[0]
     suffixes = args.solution_suffixes[0]
     steps = np.arange(0,160,10)
