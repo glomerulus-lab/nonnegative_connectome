@@ -14,12 +14,9 @@ parser.add_argument('solution_name',  type=str, nargs=1,
 parser.add_argument('output_file',  type=str, nargs=1,
                    help='name of file to save to')
 
-# create a heatmap for specified solution using U & V
+
 def create_heatmap(U, V, output_file):
-    if not os.path.exists('plots'):
-        os.makedirs('plots')   
-    if not os.path.exists('plots/test'):
-        os.makedirs('plots/test')   
+    '''Create a heatmap for specified solution using U & V.'''     
     # Ask user to confirm plots for large solutions
     if(U.shape[0] > 1000 or V.shape[1] > 1000):
         cont = input("Warning: Xolution is large, ("+str(U.shape[0])+", "+str(V.shape[1])+"). Continue? (y/n)")
@@ -27,33 +24,36 @@ def create_heatmap(U, V, output_file):
             print("Exitting plot_solution.py")
             exit()
 
-    #Compute solution        
+    # Compute solution        
     X = U @ V
     rank = U.shape[1]
 
-    #Plot solution
+    # Plot solution
     ax = sns.heatmap( X, cmap="Reds", cbar=True, xticklabels=[], yticklabels=[])
     ax.tick_params(left=False, bottom=False) ## other options are right and top
 
     plt.title("$\mathregular{W_{"+str(rank)+"}}$")
-    #Save plot as file
+    # Save plot as file
     plt.savefig(output_file, bbox_inches='tight')
     plt.clf()
 
-# Create heatmap for true test solution
+
+
 def create_heatmap_test_truth(output_file):
+    '''Returns heatmap of the true test solution.'''
     W = load_mat.load_test_truth()
-    #Plot solution
+    # Plot solution
+    title_font = {'size':'18', 'weight':'bold'}
     ax = sns.heatmap( W, cmap="Reds", cbar=True, xticklabels=[], yticklabels=[])
-    plt.title("$\mathregular{W_{truth}}$")
-    
-    #Save plot as file
+    plt.title("$\mathregular{W_{Truth}}$", title_font)
+
+    # Save plot as file
     plt.savefig(output_file, bbox_inches='tight')
     plt.clf()
     
     
-#Wrapper for create_heatmap that accepts a solution file to load
 def create_heatmap_from_solution(solution_name, output_file, greedy=False):
+    '''Wrapper for create_heatmap that accepts a solution file to load and provides U and V.'''
     U, V = load_mat.load_solution(solution_name, '../../lowrank_connectome/matlab/solution/',greedy)
     create_heatmap(U, V, output_file)
 
