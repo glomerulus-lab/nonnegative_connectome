@@ -11,6 +11,7 @@ count = 0
 
 parser = argparse.ArgumentParser(description="Computes non-negative factors given greedy solution.")
 # Arguments
+#1.test 2.lambda_test_1.000e+07 3.data/lambda_tests/ 4.data/lambda_tests/images/lambda_test_1.000e+07/ 51000 20 50 1000 20 50 -init_tol 1e-6 -tol 1e-7 --load_lamb -from_lc
 parser.add_argument('testname',  type=str, help='Name of test to compute nonnegative factors')
 parser.add_argument('solution_name', type=str, help='Name of greedy solution to initialize with,')
 parser.add_argument('data_directory',  type=str, help='Name of directory to save data')
@@ -24,12 +25,12 @@ parser.add_argument('max_inner_iter',  type=int, help='')
 parser.add_argument('max_line_iter',  type=int, help='')
 
 # Flags
-parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/matlab/solution for solution.')
+parser.add_argument('-from_lc', action='store_true', help='Search ../lowrank_connectome/matlab/solution/ for solution.')
 parser.add_argument('-tol', type=float, default=1e-6, help="PGD stopping criteria tolerance")
 parser.add_argument('-init_tol', type=float, default=1e-6, help="PGD stopping criteria tolerance for initialization refinement")
 parser.add_argument('-alt_tol', type=float, default=1e-6, help="tolerance for alt_acc_prox_grad")
 parser.add_argument('-lamb', type=float, default=100, help="value of lambda")
-parser.add_argument('--load_lamb', action='store_true', help="Search ../lowrank_connectome/matlab/solution for lambda")
+parser.add_argument('--load_lamb', action='store_true', help="Search ../lowrank_connectome/matlab/solution/ for lambda")
 
 
 def balance_norms(Y, Z):
@@ -47,7 +48,7 @@ def balance_norms(Y, Z):
 
 
 if __name__ == '__main__':
-
+    '''Constructs a nonnegative connectome.'''
     # Parse arguments
     hp = vars(parser.parse_args())
     
@@ -80,10 +81,7 @@ if __name__ == '__main__':
     Y, Z = load_mat.load_solution(hp["solution_name"],"../lowrank_connectome/matlab/solution/", hp["from_lc"])
     if hp["testname"]=="test":
         plot_test_heatmap.create_heatmap(Y,Z,hp["images_directory"]+"test_plot_greedy")
-    # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
     Y, Z = balance_norms(Y, Z)
-    # print("Y, Z norms", np.linalg.norm(Y, ord='fro'),np.linalg.norm(Z, ord='fro'))
-
 
     time_results["load_greedy"] = time.time() - start_time
 
