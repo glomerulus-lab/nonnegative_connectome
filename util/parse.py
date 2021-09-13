@@ -1,25 +1,24 @@
 import scipy.io as sci
-import numpy as np
-import matplotlib.pyplot as plt 
-import matplotlib as mpl
 import glob
 import collections 
-import math 
 import copy 
 
 
+def parse(filename, greedy=True):
+    '''
+    Returns a lists for loss, regularization, cost and lambda values for a series of files
+    Parameters:
+        filename (str): full path to solution + name of file(s) to parse 
+    Optional Parameters
+        greedy (boolean): False indicates solution is unconstrained (default)
+    '''
 
-## Parse solution(s) and save loss, regularization, cost, and lambda values in lists
-    # Input:
-        # filename: name of file to parse (includes full path) (str)
-        # greedy: is greedy solution (bool)
-    # Output: lists for each value
-def parse(filename,greedy=True):
-    # parse data for each lambda test
-    losses = []
+    # parse data for each file
     regs = []
+    losses=[]
     costs = []
     lambs = []
+    # Does not need entire filename ex. '/some/dir/filena*' will return all files in dir beginning with 'filena'
     for filepath in glob.glob(filename):
         if(greedy):
             list_variables= ["cost","loss","reg","lamb"]
