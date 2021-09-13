@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Plot dominant factors of connectome solution')
 # Arguments
-parser.add_argument('solution_suffixes',    type=str, nargs=1, help='beginning of the name of the solution ')
+parser.add_argument('suffixes',    type=str, nargs=1, help='How many tests were done (each test contains steps 0-160)')
 parser.add_argument('directory_path', type=str, nargs=1, help='Directory path where solutions are located')
 
 
@@ -65,7 +65,9 @@ if __name__ == '__main__':
     '''
     args = parser.parse_args()
     dir = args.directory_path[0]
-    suffixes = args.solution_suffixes[0]
+    suffixes=[]
+    for x in range(int(args.suffixes[0])):
+        suffixes.append("test_test_init_quality_"+str(x)+"_")
     steps = np.arange(0,160,10)
     refining, final = calc_refinement_time(dir, suffixes, steps)
     plot_init_quality(refining,final, steps)
