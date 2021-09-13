@@ -27,20 +27,23 @@ parser.add_argument('n',                type=str, nargs=1, help='number of facto
 parser.add_argument('-greedy', action='store_true', help='Search ../lowrank_connectome/data for solution.')
 parser.add_argument('-nneg',    action='store_true', help='Plot reordered & scaled solution, rather than scaled QR decomposition.')
 
-# Map voxel coordinates to show connection patterns
-# Input: 
-    # U: shape (nx * r)
-    # V: shape (r * ny)
-    # Where full (low rank) solution X = U @ V
-    # Testname: 'flatmap' or 'top_view'
-    # output_name: from solution_name
-    # n: number of factors
-# Output: an image displaying the injection and resulting projection
+
 def plot_svectors(U, V, testname, output_name, n, nneg=False):
+    '''
+    Maps voxel coordinates to show connection patterns for n factors.
+
+    Parameters:
+        U (int arr): target shape (nx * r)
+        V (int arr): source shape (r * ny)
+        testname (str) : 'flatmap' or 'top_view'
+        output_name (str) : part of outputted file's name
+        n (int) : number of factors to create
+    Optional parameters:
+        nneg (bool) : indicates a nonnegative solution
+    '''
     voxel_coords_source, voxel_coords_target, view_lut = load_mat.load_voxel_coords(testname)
 
     if(nneg):
-        outputpath = 'plots/nneg/'
 
         Q1 = U.copy()
         Q2 = (V.T).copy()
@@ -49,42 +52,28 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
         factor_norms_sq = np.zeros(r)
 
         for rank in range(r):
-            # Q1_r = Q1[:, rank][:, np.newaxis]
-            # Q2_r = Q2[:, rank][:, np.newaxis].T
             
             Q1_r = Q1[:, rank]
             Q2_r = Q2[:, rank]
-            
             Q2_norm = np.linalg.norm(Q2_r)
 
-            #factor_norms_sq[rank] = np.trace(Q2_r @ Q2_r.T @ Q1_r.T @ Q1_r)
             factor_norms_sq[rank] = np.linalg.norm(Q1_r) *Q2_norm 
 
             Q1[:, rank] *= Q2_norm
             Q2[:, rank] /= Q2_norm
 
         indexlist = np.argsort(-1*factor_norms_sq)
-        
         Q1 = Q1[:, indexlist]
         Q2 = Q2[:, indexlist]
-
     else:
-        outputpath = 'plots/qr/'
 
         Q1, R1 = np.linalg.qr(U, mode='reduced')
         Q2, R2 = np.linalg.qr(V.T)
         u, S, vh = np.linalg.svd(R1 @ (R2.T) )
         Q1 = Q1 @ u * S
         Q2 = Q2 @ vh.T
-    
-    
-    outputpath = 'plots/plot_test/' #TODO remove this line
-
-    if not os.path.exists('plots'):
-        os.makedirs('plots')   
-    if not os.path.exists(outputpath):
-        os.makedirs(outputpath)   
-
+ 
+  
 
     for i in range(int(n)):
         # Correct the sign such that the maximum element is positive
@@ -94,13 +83,19 @@ def plot_svectors(U, V, testname, output_name, n, nneg=False):
         target_img = map_to_grid(Q1[:,i] * sign, voxel_coords_target, view_lut)
         source_img = map_to_grid(Q2[:,i] * sign , voxel_coords_source, view_lut)
 
-        filename = outputpath+str(output_name)+'_factor_'+str(i+1)
+        filename = str(output_name)+'_factor_'+str(i+1)
         plot_factor(target_img, source_img, testname, filename, np.linalg.norm(Q1[:,i]), i+1)
 
 
-
-# Create 2D image using known size of view, and coordinate mapping for vectorized solution
 def map_to_grid(image_vec, voxel_coords, view_lut):
+    ''' 
+    Returns 2D image with the size of view_lut and contents of coordinate mappings for vectorized solution.
+    
+    Parameters:
+        image_vec (): image values
+        voxel_coords (): image indices
+        view_lut (): image shape
+    '''
     #initialize the image to nans
     new_image = np.empty(view_lut.shape)
     new_image[:] = np.nan
@@ -108,51 +103,80 @@ def map_to_grid(image_vec, voxel_coords, view_lut):
         new_image[voxel_coords[i,0], voxel_coords[i,1]] = image_vec[i]
     return new_image
 
-# Plots the image in the provided subplot
-def create_plot_im(ax, img):
-    #Find colormap range
+def create_plot_im(ax, img, overlay, testname, target=True):
+    '''Plots either source or target factor image in provided subplot.'''
+    #Set colormap range
+    imgMax = 0
+    if(target and testname == 'top_view'):
+        imgMax = .4
+    elif(target):
+        imgMax = .12
+    elif((not target) and testname =='top_view'):
+        imgMax = .131
+    else:
+        imgMax = .057
     imgMin = np.nanmin(img)
-    imgMax = np.nanmax(img)
     colormapLimit = max(np.abs(imgMin), np.abs(imgMax)) * 0.9
 
     #Include blue in colormap if any values are negative
     if(imgMin < 0):
-        # plt.set_cmap('RdBu_r')
         im = ax.imshow(img, cmap=ListedColormap(palettable.colorbrewer.diverging.RdBu_11_r.mpl_colors))
         im.set_clim(-colormapLimit,colormapLimit)
+
+    #Include reds in colormap when values are nonnegative
     else:
-        #im = ax.imshow(img, cmap=ListedColormap(palettable.colorbrewer.sequential.Reds_9.mpl_colors))
-        im = ax.imshow(img, cmap="Reds")
+        ylim = ax.get_ylim()
+        xlim = ax.get_xlim()
+        extent = xlim + ylim
+
+        ax.set_facecolor("lavender")
+        if(testname == 'top_view'):
+            im = ax.imshow(img, cmap="Reds", extent=extent, zorder=1)
+            ax.imshow(overlay, extent=extent, zorder=10)
+        else:
+            im = ax.imshow(img, cmap="Reds", zorder=1)
 
         im.set_clim(0,colormapLimit)
-
 
     ax.axes.get_xaxis().set_visible(False)
     ax.axes.get_yaxis().set_visible(False)
     divider = make_axes_locatable(ax)
+
     cax = divider.append_axes('right', size=0.25, pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
     cbar.set_ticks([])
     return im
 
-#Visualize the source and target for the given factor.
 def plot_factor(target_img, source_img, testname, filename, magnitude, factor):
+    '''
+    Visualizes the source and target of a given factor.
+
+    Parameters:
+        target_img (): connectivity of the target
+        source_img (): connectivity of the source
+        testname (str): 'top_view', 'flatmap'
+        filename (str): name of output image file
+        magnitude (int): size of factor??
+        factor (int): factor number
+    '''
     print(filename)
-    figsize = (2,1)
-    #fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,4)) 
+    figsize = (4,2)
     fig = plt.figure()
 
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    
+
     fig = plt.figure(figsize=(8, 6)) 
-    
-    ratios = [1.73, 1]
+
+    ratios = [1.9, 1]
     title_height = 0.85
     title_testname = "Top-View"
     if(testname == 'flatmap'):
-        ratios = [1.8, 1]
-        title_height = 0.66
+        # Ratios when colorbar not included
+        ratios = [2, 1]
+        # Ratios when colorbar is included
+        # ratios = [1.88, 1]
+        title_height = 0.7
         title_testname = "Flatmap"
     
     gs = gridspec.GridSpec(1, 2, width_ratios=ratios) 
@@ -160,22 +184,18 @@ def plot_factor(target_img, source_img, testname, filename, magnitude, factor):
     ax1 = plt.subplot(gs[0])
     ax2 = plt.subplot(gs[1])
 
+    top_down_overlay = plt.imread("../cortical_map_top_down.png")
+    im1 = create_plot_im(ax1, target_img, top_down_overlay, testname)
+    im2 = create_plot_im(ax2, source_img, top_down_overlay, testname, False)
+    xlim = ax2.get_xlim()
+    ax2.set_xlim(left=xlim[0]  +  (xlim[1]-xlim[0])/2 - 0.025, right=xlim[1])
 
-    im1 = create_plot_im(ax1, target_img)
-    im2 = create_plot_im(ax2, remove_left_of_image(source_img))
-    
     plt.figtext(0.52,title_height,title_testname + " Factor " + str(factor) + ", Norm: " + "{:.2f}".format(magnitude), ha='center', va='center', fontsize="20")
-    plt.savefig(filename.replace(".","_"), dpi=400, bbox_inches='tight')
+    plt.savefig(filename.replace(".","_")+".png", dpi=600, bbox_inches='tight')
     plt.clf()
     plt.close()
-
-def remove_left_of_image(img):
-    shape = img.shape
-    return img[:,int(shape[1]/2)-10:]
-
 
 if __name__ == '__main__':
     args = parser.parse_args()
     U, V = load_mat.load_solution(args.solution_name[0],args.path_to_solution[0], args.greedy)
     plot_svectors(U, V, args.testname[0], args.solution_name[0].split('/')[-1], args.n[0], args.nneg)
-    
