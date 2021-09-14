@@ -60,47 +60,15 @@ python3 nonnegative_converter.py top_view top_view_solution data/ images/ nonneg
 
 # Useful Modules 
 
-## nonnegative_connectome.py
-Module containing code for computing the nonnegative connectome. Used by nonnegative_converter.py
-
-## nonnegative_intialization.py
-Module containing code for computing initial nonnegative factors. Used by nonnegative_converter.py
-
-```
-...
-├── nonnegative_converter.py
-├── nonnegative
-│   ├── nonnegative_connectome.py
-│   └── nonnegative_initialization.py
-...
-```
-
-<br />
-
-------
-
-## alt_acc_prox_grad.py
-Implementation of heirarchical alternating PGD.
-Note: contains acc_prox_grad_method function from: 
-https://github.com/harrispopgen/mushi/blob/master/mushi/optimization.py
-https://github.com/harrispopgen/mushi/blob/master/LICENSE
-
-```
-...
-├── optimization
-│   └──  alt_acc_prox_grad.py
-...
-```
-<br />
-
 ------
 
 ## plot_svectors.py
-Visualize dominant singular vectors of solution. Based on plot_svectors.m in lowrank_connectome/matlab. used by nonnegative_converter.py
+Visualize dominant singular vectors of flatmap or top_view solution. Based on plot_svectors.m in lowrank_connectome/matlab. used by nonnegative_converter.py
 
 Arguments:
 - testname: either 'top_view' or 'flatmap'. Used to locate voxel coordinate mapping
 - solution_name: name of .mat solution file to plot
+- path_to_solution: path to where solution is located.
 - n: number of factors to plot
 
 Flags:
@@ -110,6 +78,22 @@ Flags:
 example invocation:
 ```
 python3 plot_svectors.py flatmap flatmap_solution path/to/file/ 6 -nneg
+```
+
+## plot_test_svectors.py
+Visualize dominant singular vectors of test solution. Based on plot_svectors.m in lowrank_connectome/matlab. used by nonnegative_converter.py
+
+Arguments:
+- solution_name: name of .mat solution file to plot
+- path_to_solution: path to where solution is located.
+- n: number of factors to plot
+
+- greedy: Look for solution name in the lowrank_connectome/data/ directory rather than nonnegative_connectome/data/.
+- raw: Plot the raw solution, rather than scaled QR decompositions.
+
+example invocation:
+```
+python3 plot_svectors.py test_solution path/to/file/ 6 -nneg
 ```
 
 ## plot_test_heatmap.py
@@ -126,7 +110,7 @@ Module to plot regularization vs cost l-curve of both nonnegative and greedy sol
 Arguments:
 - testname: Can be 'test', 'top_view' or 'flatmap'. Used to determine where figures are saved.
 - solution_name: Name of solutions to plot (Ex. 'test_*.mat')
-- path_to_solution: Path to solution to plot
+- path_to_solution: path to where solutions are located.
 - title: Title of l-curve (note: title cannot contain spaces)
 
 Flags:
@@ -154,20 +138,21 @@ python3 plot_l_curve.py test lambda_test*.mat path/to/solutions/ Unconstrained_T
 <br />
 
 
-
-## plot_error.py 
-Module to plot the error between true solution and estimated solution for both nonnegative and greedy test solutions, given various lambdas.
+## plot_rmse.py 
+Module to plot the relative root mean squared error for various values of lambda.
 
 Arguments:
-- solution_name: Name of solutions to plot (Ex. 'test_*.mat')
-- path_to_solution: Path to solution to plot
+- testname: 'test', 'top_view' or 'flatmap'. Used to locate relative RMSE values for each solution.
+- rmse_vals_file : Name of file containing all relative RMSE values for each solution
+- path_to_solution: path to where solutions are located.
+- title: Title of figure to be plotted.
 
 Flags:
-- nneg: Plot the nonnegative solution using proper keywords in data retrieval 
+- nneg: Plot the nonnegative relative RMSE solution.
 
 Example invocation:
 ```
-python3 plot_error.py lambda_test*.mat path/to/solutions/ -nneg
+python3 plot_rmse.py test_rmse*.mat path/to/solutions/ Relative_RMSE_Nonnegative_Test_Problems -nneg
 ```
 
 
@@ -176,9 +161,10 @@ python3 plot_error.py lambda_test*.mat path/to/solutions/ -nneg
 ├── plot
 │   ├── plots
 │   ├── plot_svectors.py
+│   ├── plot_test_svectors.py    
 │   ├── plot_test_heatmap.py
 │   ├── plot_l_curve.py
-│   └── plot_error.py
+│   └── plot_rmse.py
 ...
 ```
 
@@ -197,12 +183,35 @@ Module to load connectome solutions from .mat files. Used by nonnegative_convert
     └── read_hyperparameters.py
  ```
 
+------
 
+## final_cost_by_rank.py
+Module to plot the total costs for solutions of different ranks.
 
-## visualizations?
+Arguments:
+- testname: either 'top_view' or 'flatmap'. 
+- directory_path: path to where solutions are located.
 
-final_cost_by_rank.py
 Example invocation:
 ```
-python3 final_cost_by_rank.py flatmap ../ranks/
+python3 final_cost_by_rank.py top_view /path/to/solutions
 ```
+
+## innit_quality.py
+Module to plot the average total runtime in comparison to the number of refinement iterations made.
+
+Arguments:
+- suffixes: The total number of tests completed (each test contains solutions with refinements 0-160) . 
+- directory_path: path to where solutions are located.
+
+Example invocation:
+```
+python3 final_cost_by_rank.py top_view /path/to/solutions
+```
+
+```
+...
+├── visualizations
+    ├── final_cost_by_rank.py
+    └── init_quality.py
+ ```
