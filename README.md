@@ -4,7 +4,7 @@ This repository generates a nonnegative connectome from an unconstrained connect
 
 After nonnegative_converter.py returns a solution, its most prominent factors can be visualized using plot_svectors.py for top-view or flatmap solutions and plot_test_svectors.py for test solutions. The file plot_test_heatmap.py uses the function create_heatmap_from_solution() to display projections for a given test solution. 
 
-To find an optimal value of lambda plot_l_curve.py can be used to create a loss and regularization l-curve for various solutions of one type, it also has the option of creating a log-scale l-curve. Also, Relative RMSE curves can be made for multiple solutions of the same type (test, top-view, or flatmap). This begins with using relative_rmse.py to calculate the relative RMSE for each solution, then plot_rmse.py creates figures by using this data.
+To find an optimal value of lambda plot_l_curve.py can be used to create a loss and regularization L-curve for various solutions of one type, it also has the option of creating a log-scale L-curve. Also, Relative RMSE curves can be made for multiple solutions of the same type (test, top-view, or flatmap). This begins with using relative_rmse.py to calculate the relative RMSE for each solution, then plot_rmse.py creates figures by using this data.
 
 Additionally, costs for various ranks can be measured using final_cost_by_rank.py, which will take a series of solutions from one type with different ranks and plot their final costs. Note that final_cost_by_rank requires both the nonnegative and related unconstrained solutions. The file init_quality.py constructs a graph comparing refinement iterations with the total runtime. 
 
