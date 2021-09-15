@@ -1,6 +1,10 @@
 import numpy as np
-import alt_acc_prox_grad
-import math_util
+import sys, inspect, os
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import optimization.alt_acc_prox_grad as alt_acc_prox_grad
+import util.math_util as math_util
 from jax import jit
 import jax.numpy as jnp
 # from jax.config import config
@@ -13,7 +17,7 @@ import jax.numpy as jnp
 # Y shape (nx * p)
 # Z shape (p * ny)
 
-# Returns W, H such the X = W @ Z
+# Returns W, H such that X = W @ Z
 # W shape (nx * (2p-1))
 # H shape ((2p-1) * ny)
 def init_nonnegative_factors(Y, Z):

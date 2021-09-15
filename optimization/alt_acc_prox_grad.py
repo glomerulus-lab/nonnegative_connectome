@@ -1,6 +1,10 @@
 import numpy as np
 from typing import Callable
-import math_util
+import sys, inspect,os
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+import util.math_util as math_util
 line_count = 0
 
 def alternating_pgd(U, V, 

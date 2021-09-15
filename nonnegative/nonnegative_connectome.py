@@ -1,7 +1,11 @@
 import numpy as np
 import scipy.linalg
-import math_util
-import alt_acc_prox_grad
+import sys, inspect, os
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import optimization.alt_acc_prox_grad as alt_acc_prox_grad
+import util.math_util as math_util
 import time
 
 counts = [0,0,0]
@@ -101,8 +105,14 @@ def regularized_cost(U, V, X, Y, Lx, Ly, lamb, Omega):
     # print("regularized_cost", U.shape, V.shape, X.shape, Y.shape, Lx.shape, Ly.shape, Omega.shape)
     result = np.linalg.norm(P_Omega(U @ (V.T @ X) - Y, Omega), ord='fro')**2
     result = result + lamb * math_util.factorized_sum_frobenius_sq_j_einsum(Ly @ U, V.T, U, V.T @ Lx.T)
-    
     times[0] += time.time() - start_time
 
     return result
 
+def loss(U, V, X, Y, Omega):
+    loss = np.linalg.norm(P_Omega(U @ (V.T @ X) - Y, Omega), ord='fro')**2
+    return loss
+
+def regularization(U, V, Lx, Ly, lamb):
+    regularization = math_util.factorized_sum_frobenius_sq_j_einsum(Ly @ U, V.T, U, V.T @ Lx.T)
+    return regularization
